@@ -2,6 +2,11 @@ package org.laplacetec.study
 package problems99.lists
 
 object P10 {
+  def encode[A <: Equals](acc: List[(Int, A)], curr: A): List[(Int, A)] =
+    acc match {
+      case (cnt, comp) :: tail if curr == comp => (cnt + 1, curr) :: tail
+      case _ => (1, curr) :: acc
+    }
   /**
    * (*) Run-length encoding of a list.
    * Use the result of problem P09 to implement the so-called run-length encoding data compression method.
@@ -13,5 +18,5 @@ object P10 {
    * @tparam A
    * @return
    */
-  def solution[A <: Equals]: List[A] => List[(Int, A)] = ???
+  def solution[A <: Equals]: List[A] => List[(Int, A)] = l => P08.foldLeftToList(l, encode).reverse
 }
