@@ -2,6 +2,7 @@ package org.laplacetec.study
 package problems99.lists
 
 object P07 {
+  type NestedList[A] = List[Either[A, NestedList[A]]]
   /**
    * (**) Flatten a nested list structure.
    * Example:
@@ -9,5 +10,9 @@ object P07 {
    *    res0: List[Any] = List(1, 1, 2, 3, 5, 8)
    * @return
    */
-  def solution: List[Any] => List[Any] = ???
+  def solution[A]: NestedList[A] => List[A] = {
+    case Left(v) :: tl => v :: solution(tl)
+    case Right(li) :: tl => solution(li) ++ solution(tl)
+    case _ => Nil
+  }
 }

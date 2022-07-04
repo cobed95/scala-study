@@ -2,6 +2,14 @@ package org.laplacetec.study
 package problems99.lists
 
 object P11 {
+  def encodeModified[A <: Equals](acc: List[Either[A, (Int, A)]], curr: A): List[Either[A, (Int, A)]] =
+    acc match {
+      case Right((cnt, comp)) :: tail if curr == comp => Right(cnt + 1, comp) :: tail
+      case Right((_, _)) :: _ => Left(curr) :: acc
+      case Left(comp) :: tail if curr == comp => Right(2, comp) :: tail
+      case Left(_) :: _ => Left(curr) :: acc
+      case _ => Left(curr) :: Nil
+    }
   /**
    * (*) Modified run-length encoding.
    * Modify the result of problem P10 in such a way that if an element has no duplicates
@@ -13,5 +21,5 @@ object P11 {
    * @tparam A
    * @return
    */
-  def solution[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def solution[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = l => P08.foldLeftToList(l, encodeModified).reverse
 }
