@@ -1,6 +1,14 @@
 # scala-study
 Let's learn Scala
 
+## Policy
+### 99 Problems in Scala
+#### Problems
+Either see the generated scaladoc or visit [this page](https://aperiodic.net/phil/scala/s-99/)
+
+#### How we learn
+1. Solve no more than 7 stars each week.
+
 ## Test
 You must implement your own tests.
 ### Local
