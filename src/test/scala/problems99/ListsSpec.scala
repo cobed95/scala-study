@@ -84,7 +84,7 @@ class ListsSpec extends AnyFunSpec{
         assert(Lists.isPalindrome(List(1, 2, 3, 2, 1)))
       }
 
-      it("should return true if list isn't palindrome") {
+      it("should return false if list isn't palindrome") {
         assert(!Lists.isPalindrome(List(1, 2, 3, 4, 5)))
       }
 
