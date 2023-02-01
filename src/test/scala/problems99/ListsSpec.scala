@@ -54,5 +54,40 @@ class ListsSpec extends AnyFunSpec{
         })
       }
     }
+
+    describe("the solution to P04") {
+      it("should return length of list if length > 0") {
+        val toTest = List(0, 1, 2, 3)
+        assert(Lists.length(toTest) == toTest.length)
+      }
+
+      it("should return 0 if list is empty") {
+        assert(Lists.length(Nil) == 0)
+      }
+
+    }
+
+    describe("the solution to P05") {
+      it("should return reverse of list if length > 0") {
+        val toTest = List(0, 1, 2, 3)
+        assert(Lists.reverse(toTest) == toTest.reverse)
+      }
+
+      it("should return Nil if list is empty") {
+        assert(Lists.reverse(Nil) == Nil)
+      }
+
+    }
+
+    describe("the solution to P06") {
+      it("should return true if list is palindrome") {
+        assert(Lists.isPalindrome(List(1, 2, 3, 2, 1)))
+      }
+
+      it("should return true if list isn't palindrome") {
+        assert(!Lists.isPalindrome(List(1, 2, 3, 4, 5)))
+      }
+
+    }
   }
 }
