@@ -15,7 +15,7 @@ object Lists {
     * @return Some(The last element) of a list if it exists, else None
     */
   def last[A]: List[A] => Option[A] = {
-    case head :: tail if tail.isEmpty => Option(head)
+    case head :: tail if tail.isEmpty => Some(head)
     case _ :: tail => last(tail)
     case Nil => None
   }
@@ -32,7 +32,7 @@ object Lists {
     * @return Some(penultimate element) if it exists, None otherwise.
     */
   def penultimate[A]: List[A] => Option[A] = {
-    case head :: tail if tail.length == 1 => Option(head)
+    case head :: tail if tail.length == 1 => Some(head)
     case _ :: tail => penultimate(tail)
     case Nil => None
   }
