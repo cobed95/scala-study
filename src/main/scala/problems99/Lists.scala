@@ -34,6 +34,7 @@ object Lists {
     case hd :: _ :: Nil => Some(hd)
     case _ :: Nil => None
     case _ :: tl => penultimate(tl)
+    case _ => None
   }
 
   /** (*) Find the Kth element of a list.
