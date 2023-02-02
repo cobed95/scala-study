@@ -3,6 +3,21 @@ on:
   pull_request:
     branches:
       - main
+      - andy.lee
+      - benjamin.son
+      - elin.jo
+      - jayce.park
+      - lukas.widmer
+      - sam.kim
+  push:
+    branches:
+      - main
+      - andy.lee
+      - benjamin.son
+      - elin.jo
+      - jayce.park
+      - lukas.widmer
+      - sam.kim
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
