@@ -91,6 +91,7 @@ object Lists {
   def zip[L, R](left: List[L])(right: List[R]): List[(L, R)] = (left, right) match {
     case (hdLeft :: tlLeft, hdRight :: tlRight) => (hdLeft, hdRight) :: zip(tlLeft)(tlRight)
     case (_, Nil) => Nil
+    case (_, _) => Nil
   }
 
   /** (*) Find out whether a list is a palindrome.

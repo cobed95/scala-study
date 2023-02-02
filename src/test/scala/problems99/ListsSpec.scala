@@ -54,5 +54,47 @@ class ListsSpec extends AnyFunSpec{
         })
       }
     }
+
+    describe("the solution to P04") {
+      it("should return 0 when the list is empty.") {
+        assert(Lists.length(List()) == 0)
+      }
+
+      it("should return the length properly.") {
+        assert(Lists.length(List(0, 1, 2, 3)) == 4)
+      }
+    }
+
+    describe("the solution to P05") {
+      it("should reverse empty lists properly.") {
+        assert(Lists.reverse(List()).isEmpty)
+      }
+
+      it("should reverse lists properly.") {
+        assert(Lists.reverse(List(0, 1, 2, 3)) == List(3, 2, 1, 0))
+      }
+    }
+
+    describe("the solution to P06") {
+      it("should return true when the list is empty.") {
+        assert(Lists.isPalindrome(List()))
+      }
+
+      it("should return true when the list has a single element") {
+        assert(Lists.isPalindrome(List(0)))
+      }
+
+      it("should return true when the list is a palindrome with odd number of elements") {
+        assert(Lists.isPalindrome(List(1, 2, 3, 2, 1)))
+      }
+
+      it("should return true when the list is a palindrome with even number of elements") {
+        assert(Lists.isPalindrome(List(1, 2, 3, 3, 2, 1)))
+      }
+
+      it("should return false when the list is not a palindrome") {
+        assert(!Lists.isPalindrome(List(1, 2, 3, 4)))
+      }
+    }
   }
 }
