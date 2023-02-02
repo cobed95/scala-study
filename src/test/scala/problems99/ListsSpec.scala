@@ -3,7 +3,7 @@ package problems99
 
 import org.scalatest.funspec.AnyFunSpec
 
-class ListsSpec extends AnyFunSpec{
+class ListsSpec extends AnyFunSpec {
   describe("In the lists section of the 99 Problems in Scala,") {
     describe("the solution to P01") {
       it("should return None when list is empty.") {
@@ -52,6 +52,28 @@ class ListsSpec extends AnyFunSpec{
         List(0, 1, 2, 3) foreach (index => {
           assert(Lists.nth(index, List(0, 1, 2, 3)).get == index)
         })
+      }
+    }
+
+    describe("the solution to P04") {
+      it("should return the length") {
+        assert(Lists.length(List(0, 1, 2)) == 3)
+      }
+    }
+
+    describe("the solution to P05") {
+      it("should return reversed list") {
+        assert(List(0, 1, 2) == Lists.reverse(List(2, 1, 0)))
+      }
+    }
+
+    describe("the solution to P06") {
+      it("should check for palindrome") {
+        assert(Lists.isPalindrome(List(0, 1, 0)))
+      }
+
+      it("should check not for palindrome") {
+        assert(!Lists.isPalindrome(List(0, 1, 2)))
       }
     }
   }

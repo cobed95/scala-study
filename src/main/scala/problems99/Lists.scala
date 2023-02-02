@@ -2,6 +2,7 @@ package org.laplacetec.study
 package problems99
 
 object Lists {
+
   /** (*) Find the last element of a list
     *
     * Example: {{{
@@ -12,7 +13,11 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Some(The last element) of a list if it exists, else None
     */
-  def last[A]: List[A] => Option[A] = ???
+  def last[A]: List[A] => Option[A] = {
+    case Nil       => None
+    case x :: Nil  => Some(x)
+    case _ :: rest => last(rest)
+  }
 
   /** (*) Find the last but one element of a list
     *
@@ -24,7 +29,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Some(penultimate element) if it exists, None otherwise.
     */
-  def penultimate[A]: List[A] => Option[A] = ???
+  def penultimate[A]: List[A] => Option[A] = {
+    case Nil           => None
+    case x :: Nil      => None
+    case x :: y :: Nil => Some(x)
+    case _ :: rest     => penultimate(rest)
+  }
 
   /** (*) Find the Kth element of a list.
     *
@@ -37,7 +47,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return Some(nth element) if it exists, None otherwise
     */
-  def nth[A]: (Int, List[A]) => Option[A] = ???
+  def nth[A]: (Int, List[A]) => Option[A] = {
+    case (_, Nil)       => None
+    case (0, x :: rest) => Some(x)
+    case (n, x :: rest) => nth(n - 1, rest)
+  }
 
   /** (*) Find the number of elements of a list.
     *
@@ -49,7 +63,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The number of elements in the list.
     */
-  def length[A]: List[A] => Int = ???
+  def length[A]: List[A] => Int = {
+    case Nil       => 0
+    case x :: Nil  => 1
+    case x :: rest => length(rest) + 1
+  }
 
   /** (*) Reverse a list.
     *
@@ -61,7 +79,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The reversed list.
     */
-  def reverse[A]: List[A] => List[A] = ???
+  def reverse[A]: List[A] => List[A] = {
+    case x :: Nil  => List(x)
+    case x :: rest => reverse(rest) ::: List(x)
+  }
 
   /** (*) Find out whether a list is a palindrome.
     *
@@ -73,7 +94,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return True if the list is a palindrome, false otherwise
     */
-  def isPalindrome[A <: Equals]: List[A] => Boolean = ???
+  def isPalindrome[A]: List[A] => Boolean = x => x == reverse(x)
 
   /** (**) Flatten a nested list structure
     *
