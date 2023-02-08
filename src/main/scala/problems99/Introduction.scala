@@ -20,7 +20,8 @@ object Introduction {
   def postProcessing1: Int => Option[Int] = ???
   def postProcessing2: Int => Option[Int] = ???
   someFailableOperation(0).flatMap(postProcessing0).flatMap(postProcessing1).flatMap(postProcessing2)
-
+  // (Some[T]) getTopScore(T) -> Option[Int]  
+  // (None[T])  -> Int  
   /**
    * You can even do this due to the nicely designed language syntax.
    * This is often referred to as the infix notation.
@@ -29,7 +30,10 @@ object Introduction {
    *    infix notation: 1 + 1
    */
   someFailableOperation(0) flatMap postProcessing0 flatMap postProcessing1 flatMap postProcessing2
-
+  // [ Some[Option[Person]], None ]
+  // car: Option[Car] -> Some[Car]
+  // Some[car].owner: Option[Person]
+  // owner.license: Option[String]
   /**
    * We can implement this with pattern matching.
    */

@@ -74,7 +74,7 @@ object Lists {
     * @return True if the list is a palindrome, false otherwise
     */
   def isPalindrome[A <: Equals]: List[A] => Boolean = ???
-
+  //// start here
   /** (**) Flatten a nested list structure
     *
     * Example: {{{
@@ -84,7 +84,12 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+
+  def flatten: List[Any] => List[Any] = _ match {
+    case Nil => Nil
+    case (head: List[_]) :: tail  => flatten(head) ::: flatten(tail)
+    case head :: tail => head :: flatten(tail)
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -95,10 +100,16 @@ object Lists {
     *   // res0: List[Symbol] = List('a, 'b, 'c, 'a, 'd, 'e)
     * }}}
     *
+    * 
+    *  (0, 1, 2, 2, 2)
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+  def compress[A]: List[A] => List[A] = (l: List[A]) => l match {
+    case Nil => Nil
+    case head :: mid :: tail if head == mid => compress(head::tail)
+    case head :: tail => head :: compress(tail)
+  } 
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -111,7 +122,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def _pack[A]: (List[List[A]]) => List[List[A]] = _ match {
+    case Nil => Nil
+    case head :: mid :: tail if head(0) == mid(0) => _pack((head:::mid) :: tail)
+    case head :: tail => head :: _pack(tail)
+  }
+  def pack[A]: List[A] => List[List[A]] = (l: List[A]) => _pack(l.map(List(_)))
 
   /** (*) Run-length encoding of a list.
     *
@@ -126,8 +142,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
-
+  def encode[A]: List[A] => List[(Int, A)] = (l: List[A]) => pack(l).map((s: List[A]) => (s.length, s(0)))
   /** (*) Modified run-length encoding.
     *
     * Modify the result of problem P10 in such a way that if an element has no duplicates
