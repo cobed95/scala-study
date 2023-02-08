@@ -89,5 +89,37 @@ class ListsSpec extends AnyFunSpec{
       }
 
     }
+
+    describe("the solution to P07") {
+      it("should return flatten list") {
+        assert(Lists.flatten(List(List(1, 1), 2, List(3, List(5, 8)))) == List(1, 1, 2, 3, 5, 8))
+      }
+    }
+
+    describe("the solution to P08") {
+      it("should return flatten list") {
+        assert(Lists.compress(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e')) == List('a', 'b', 'c', 'a', 'd', 'e'))
+      }
+    }
+
+    describe("the solution to P09") {
+      it("should return packed list") {
+        assert(
+          Lists.pack(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+            == List(List('a', 'a', 'a', 'a'), List('b'), List('c', 'c'), List('a', 'a'), List('d'), List('e', 'e', 'e', 'e'))
+        )
+      }
+    }
+
+    describe("the solution to P10") {
+      it("should return encoded list") {
+        assert(
+          Lists.encode(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        )
+      }
+    }
+
+
   }
 }

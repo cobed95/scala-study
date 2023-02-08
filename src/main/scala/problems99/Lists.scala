@@ -50,11 +50,26 @@ object Lists {
   @tailrec
   def nth[A](idx: Int, lst: List[A]): Option[A] = {
     lst match {
-      case Nil => None
-      case _ if (idx < 0) => None
       case head :: _ if (idx == 0) => Some(head)
       case _ :: tail => nth(idx - 1, tail)
+      case Nil => None
+      case _ if (idx < 0) => None
     }
+  }
+
+  def nth2[A]: (Int, List[A]) => Option[A] = (idx: Int, lst: List[A]) => {
+    lst match {
+      case head :: _ if (idx == 0) => Some(head)
+      case _ :: tail => nth2(idx - 1, tail)
+      case Nil => None
+      case _ if (idx < 0) => None
+    }
+  }
+
+  def nth3[A]: (Int, List[A]) => Option[A] = {
+    case (n, _ :: tail) => nth3(n - 1, tail)
+    case (0, head :: _) => Some(head)
+    case (_, Nil) => None
   }
 
   /** (*) Find the number of elements of a list.
@@ -109,7 +124,13 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+  def flatten: List[Any] => List[Any] = {
+    case Nil => Nil
+    case head :: tail => head match {
+      case _head: List[Any] => flatten(_head) ::: flatten(tail)
+      case _head => _head :: flatten(tail)
+    }
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -123,7 +144,17 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+
+  def _compress[A]: (List[A], List[A]) => List[A] = {
+    case (Nil, l) =>l
+    case (head :: tail, Nil) => _compress(tail, List(head))
+    case (head :: tail, head2 :: tail2) if head == head2 => _compress(tail, head2 :: tail2)
+    case (head :: tail, l) => _compress(tail, head :: l)
+  }
+
+  def compress[A]: List[A] => List[A] = {
+    a => reverse(_compress(a, Nil))
+  }
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -136,7 +167,17 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def _pack[A]: (List[A], List[A], List[List[A]]) => List[List[A]] = {
+    case (head :: tail, Nil, res) => _pack(tail, List(head), res)
+    case (Nil, Nil, res) => res
+    case (Nil, tmp, res) => _pack(Nil, Nil, tmp :: res)
+    case (head :: tail, head2 :: tail2, l) if head == head2 => _pack(tail, head :: head2 :: tail2, l)
+    case (head :: tail, tmp, res) => _pack(tail, List(head), tmp :: res)
+  }
+
+  def pack[A]: List[A] => List[List[A]] = {
+    a => reverse(_pack(a, Nil, Nil))
+  }
 
   /** (*) Run-length encoding of a list.
     *
@@ -151,7 +192,18 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
+
+  def _encode[A]: (List[A], Int, A, List[(Int, A)]) => List[(Int, A)] = {
+    case (head :: tail, 0, _, res) => _encode(tail, 1, head, res)
+    case (Nil, 0, _, res) => res
+    case (Nil, len, latest, res) => _encode(Nil, 0, latest, (len, latest) :: res)
+    case (head :: tail, len, latest, res) if head == latest => _encode(tail, len + 1, latest, res)
+    case (head :: tail, len, latest, res) => _encode(tail, 1, head, (len, latest):: res)
+  }
+
+  def encode[A]: List[A] => List[(Int, A)] = {
+    a => reverse(_encode(a, 0, a.head, Nil))
+  }
 
   /** (*) Modified run-length encoding.
     *
