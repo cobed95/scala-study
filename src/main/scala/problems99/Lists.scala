@@ -2,6 +2,7 @@ package org.laplacetec.study
 package problems99
 
 import scala.annotation.tailrec
+import scala.util.chaining.scalaUtilChainingOps
 
 object Lists {
   /** (*) Find the last element of a list
@@ -104,10 +105,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return True if the list is a palindrome, false otherwise
     */
-  def isPalindrome[A <: Equals]: List[A] => Boolean = ls => ((ls zip reverse(ls)) map {
-    case (a, b) if a == b => true
-    case _ => false
-  }) forall (x => x)
+  def isPalindrome[A <: Equals]: List[A] => Boolean = ls => (ls zip reverse(ls)) forall (_ == _)
 
   /** (**) Flatten a nested list structure
     *
@@ -118,7 +116,19 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+  def flatten: List[Any] => List[Any] = {
+    case Nil => Nil
+    case hd :: tl => hd match {
+      case ns @ _ :: _ => flatten(ns.asInstanceOf[List[Any]]) ::: flatten(tl)
+      case _ => hd :: flatten(tl)
+    }
+  }
+
+  def compressIter[A]: (A, List[A]) => List[A] = {
+    case (dup, Nil) => dup :: Nil
+    case (dup, hd :: tl) if dup == hd => compressIter(dup, tl)
+    case (dup, hd :: tl) => dup :: compressIter(hd, tl)
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -132,7 +142,17 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+  def compress[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case hd :: tl => compressIter(hd, tl)
+  }
+
+  def packIter[A]: (List[A], List[A]) => List[List[A]] = {
+    case (Nil, Nil) => Nil
+    case (ls, Nil) => ls :: Nil
+    case (res @ hdRes :: _, hdIter :: tlIter) if hdRes == hdIter => packIter(hdIter :: res, tlIter)
+    case (res @ _ :: _, hdIter :: tlIter) => res :: packIter(hdIter :: Nil, tlIter)
+  }
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -145,7 +165,16 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def pack[A <: Equals]: List[A] => List[List[A]] = {
+    case Nil => Nil
+    case hd :: tl => packIter(hd :: Nil, tl)
+  }
+
+  def filterNoneAndGet[A <: Equals]: List[(Int, Option[A])] => List[(Int, A)] = {
+    case Nil => Nil
+    case (_, None) :: tl => filterNoneAndGet(tl)
+    case (n, Some(v)) :: tl => (n, v) :: filterNoneAndGet(tl)
+  }
 
   /** (*) Run-length encoding of a list.
     *
@@ -160,7 +189,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
+  def encode[A <: Equals](ls: List[A]): List[(Int, A)] = filterNoneAndGet(pack(ls) map {
+    case Nil => (0, None)
+    case packed @ hd :: _ => (length(packed), Some(hd))
+  })
 
   /** (*) Modified run-length encoding.
     *
