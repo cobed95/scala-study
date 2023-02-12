@@ -76,5 +76,56 @@ class ListsSpec extends AnyFunSpec {
         assert(!Lists.isPalindrome(List(0, 1, 2)))
       }
     }
+
+    describe("the solution to flatMap") {
+      it("should return flattened list") {
+        assert(
+          Lists.flatMap[Any, Any](List(List(0), List(1), 2, List(List(3))), {
+            case x: List[_] => x
+            case x          => List(x)
+          }) == List(0, 1, 2, List(3))
+        )
+      }
+    }
+
+    describe("the solution to P07") {
+      it("should return flattened list 1") {
+        assert(Lists.flatten(List(0)) == List(0))
+      }
+
+      it("should return flattened list 2") {
+        assert(Lists.flatten(List(0, List(1))) == List(0, 1))
+      }
+
+      it("should return flattened list 3") {
+        assert(
+          Lists.flatten(List(0, List(1), 2, List(3, List(4)))) ==
+            List(0, 1, 2, 3, 4)
+        )
+      }
+    }
+
+    describe("the solution to P08") {
+      it("should return compressed list") {
+        assert(Lists.compress(List(1, 1, 2, 2, 1)) == List(1, 2, 1))
+      }
+    }
+
+    describe("the solution to P09") {
+      it("should return packed list") {
+        assert(
+          Lists
+            .pack(List(1, 1, 2, 2, 1)) == List(List(1, 1), List(2, 2), List(1))
+        )
+      }
+    }
+
+    describe("the solution to P10") {
+      it("should return encoded list") {
+        assert(
+          Lists.encode(List(1, 1, 2, 2, 1)) == List((2, 1), (2, 2), (1, 1))
+        )
+      }
+    }
   }
 }

@@ -105,7 +105,15 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+  def flatten(ls: List[Any]): List[Any] = ls flatMap {
+    case x: List[_] => flatten(x)
+    case x          => List(x)
+  }
+
+  def flatMap[A, B](ls: List[A], f: A => List[B]): List[B] = ls match {
+    case x :: rest => f(x) ::: flatMap(rest, f)
+    case _         => Nil
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -119,7 +127,18 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+  def compress[A]: List[A] => List[A] = { ls =>
+    fold[A, List[A]](ls, List(), {
+      case (Nil, a)              => List(a)
+      case (b, a) if b.last == a => b
+      case (b, a)                => b ::: List(a)
+    })
+  }
+
+  private def fold[A, B](ls: List[A], i: B, f: (B, A) => B): B = ls match {
+    case x :: rest => f(fold(rest, i, f), x)
+    case _         => i
+  }
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -132,7 +151,13 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def pack[A]: List[A] => List[List[A]] = { ls =>
+    fold[A, List[List[A]]](ls, List(List()), {
+      case (List(Nil), a)                  => List(List(a))
+      case ((x :: y) :: rest, a) if x == a => (a :: x :: y) :: rest
+      case (b, a)                          => List(a) :: b
+    })
+  }
 
   /** (*) Run-length encoding of a list.
     *
@@ -147,7 +172,16 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
+  def encode[A]: List[A] => List[(Int, A)] = { ls =>
+    map[List[A], (Int, A)](pack(ls), {
+      case x :: rest => (length(x :: rest), x)
+    })
+  }
+
+  def map[A, B](ls: List[A], f: A => B): List[B] = ls match {
+    case x :: rest => f(x) :: map(rest, f)
+    case _         => Nil
+  }
 
   /** (*) Modified run-length encoding.
     *
