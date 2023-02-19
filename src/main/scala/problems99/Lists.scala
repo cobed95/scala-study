@@ -196,7 +196,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def encodeModified[A]: List[A] => List[Either[A, (Int, A)]] = { ls =>
+    map[(Int, A), Either[A, (Int, A)]](encode(ls), {
+      case (x, y) if x == 1 => Left(y)
+      case (x, y)           => Right((x, y))
+    })
+  }
 
   /** (**) Decode a run-length encoded list.
     *
@@ -209,7 +214,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decode[A]: List[(Int, A)] => List[A] = { ls =>
+    fold[(Int, A), List[A]](ls, List(), {
+      case (b, (x, y)) if x > 0 => y :: decode(List((x - 1, y))) ::: b
+      case (b, _)               => b
+    })
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -222,7 +232,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The directly encoded result stored in a list.
     */
-  def encodeDirect[A]: List[A] => List[(Int, A)] = ???
+  def encodeDirect[A]: List[A] => List[(Int, A)] = { ls =>
+    fold[A, List[(Int, A)]](ls, List(), {
+      case (Nil, a)                      => List((1, a))
+      case ((x, y) :: rest, a) if y == a => (x + 1, y) :: rest
+      case (b, a)                        => (1, a) :: b
+    })
+  }
 
   /** (*) Duplicate the elements of a list.
     *
@@ -234,7 +250,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
+  def duplicate[A]: List[A] => List[A] = { ls =>
+    fold[A, List[A]](ls, List(), {
+      case (b, a) => a :: a :: b
+    })
+  }
 
   /** (**) Duplicate the elements of a list a given number of times.
     *

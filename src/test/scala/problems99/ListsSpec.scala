@@ -127,5 +127,40 @@ class ListsSpec extends AnyFunSpec {
         )
       }
     }
+
+    describe("the solution to P11") {
+      it("should return modified encoded list") {
+        assert(
+          Lists.encodeModified(List(1, 1, 2, 2, 1)) == List(
+            Right((2, 1)),
+            Right((2, 2)),
+            Left(1)
+          )
+        )
+      }
+    }
+
+    describe("the solution to P12") {
+      it("should return decoded list") {
+        assert(
+          Lists.decode(List((2, 1), (2, 2), (1, 1))) == List(1, 1, 2, 2, 1)
+        )
+      }
+    }
+
+    describe("the solution to P13") {
+      it("should return directly encoded list") {
+        assert(
+          Lists
+            .encodeDirect(List(1, 1, 2, 2, 1)) == List((2, 1), (2, 2), (1, 1))
+        )
+      }
+    }
+
+    describe("the solution to P14") {
+      it("should return duplicated list") {
+        assert(Lists.duplicate(List(1, 2, 1)) == List(1, 1, 2, 2, 1, 1))
+      }
+    }
   }
 }
