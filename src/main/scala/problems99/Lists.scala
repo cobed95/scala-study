@@ -1,6 +1,7 @@
 package org.laplacetec.study
 package problems99
 
+import scala.List
 import scala.annotation.tailrec
 
 object Lists {
@@ -50,9 +51,9 @@ object Lists {
     */
   @tailrec
   def nth[A](n: Int, ls: List[A]): Option[A] = {
-    if(ls.isEmpty) return None
-    if(n == 0) return Some(ls.head)
-    ls match {
+    if(ls.isEmpty) None
+    else if(n == 0) Some(ls.head)
+    else ls match {
       case Nil => None
       case _ :: tail => nth(n - 1, tail)
     }
@@ -109,7 +110,12 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+  def flatten: List[Any] => List[Any] = {
+    case Nil => Nil
+    case (head: List[Any]) :: Nil => flatten(head)
+    case ls @ _ :: Nil => ls
+    case head :: tail => flatten(List(head)) ::: flatten(tail)
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -123,7 +129,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+  def compress[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case head :: Nil => List(head)
+    case head :: tail if head != tail.head => compress(List(head)) ::: compress(tail)
+    case _ :: tail => compress(tail)
+  }
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -136,7 +147,17 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def packIter[A]: (List[A], List[A]) => List[List[A]] = {
+    case (Nil, Nil) => Nil
+    case (ls, Nil) => ls :: Nil
+    case (res @ hdRes :: _, hdIter :: tlIter) if hdRes == hdIter => packIter(hdIter :: res, tlIter)
+    case (res @ _ :: _, hdIter :: tlIter) => res :: packIter(hdIter :: Nil, tlIter)
+  }
+
+  def pack[A]: List[A] => List[List[A]] = {
+    case Nil => Nil
+    case hd :: tl => packIter(hd :: Nil, tl)
+  }
 
   /** (*) Run-length encoding of a list.
     *
@@ -151,7 +172,17 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
+
+  def filterNoneAndGet[A]: List[(Int, Option[A])] => List[(Int, A)] = {
+    case Nil => Nil
+    case (_, None) :: tl => filterNoneAndGet(tl)
+    case (n, Some(v)) :: tl => (n, v) :: filterNoneAndGet(tl)
+  }
+
+  def encode[A](ls: List[A]): List[(Int, A)] = filterNoneAndGet(pack(ls) map {
+    case Nil => (0, None)
+    case packed @ hd :: _ => (length(packed), Some(hd))
+  })
 
   /** (*) Modified run-length encoding.
     *
@@ -166,7 +197,9 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def encodeModified[A](ls: List[A]): List[Either[A, (Int, A)]] = encode(ls) map {
+    case (len, el) => if (len == 1) Left(el) else Right(len, el)
+  }
 
   /** (**) Decode a run-length encoded list.
     *
@@ -179,7 +212,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decode[A]: List[(Int, A)] => List[A] = {
+    case (len, el) :: tl if len != 0 => el :: decode((len - 1, el) :: tl)
+    case (len, el) :: Nil if len != 0 => el :: decode((len - 1, el) :: Nil)
+    case _ :: Nil => Nil
+    case _ :: tl => decode(tl)
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -192,7 +230,17 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The directly encoded result stored in a list.
     */
-  def encodeDirect[A]: List[A] => List[(Int, A)] = ???
+  def dataCompression[A]: ((Int, A), List[A]) => List[(Int, A)] = {
+    case (res, Nil) => res :: Nil
+    case ((len, hdRes), hdIter :: Nil) if hdRes == hdIter => dataCompression((len + 1, hdRes), Nil)
+    case (res, hdIter :: Nil) => res :: dataCompression((1, hdIter), Nil)
+    case ((len, hdRes), hdIter :: tlIter) if hdRes == hdIter => dataCompression((len + 1, hdRes), tlIter)
+    case (res, hdIter :: tlIter) => res :: dataCompression((1, hdIter), tlIter)
+  }
+
+  def encodeDirect[A]: List[A] => List[(Int, A)] = {
+    case hd :: tl => dataCompression((1, hd), tl)
+  }
 
   /** (*) Duplicate the elements of a list.
     *
@@ -204,7 +252,10 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
+  def duplicate[A]: List[A] => List[A] = {
+    case hd :: Nil => hd :: hd :: Nil
+    case hd :: tl => hd :: hd :: duplicate(tl)
+  }
 
   /** (**) Duplicate the elements of a list a given number of times.
     *

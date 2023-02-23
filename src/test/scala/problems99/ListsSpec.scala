@@ -1,6 +1,7 @@
 package org.laplacetec.study
 package problems99
 
+import org.laplacetec.study.problems99.Lists.{compress, decode, duplicate, encodeDirect, encodeModified}
 import org.scalatest.funspec.AnyFunSpec
 
 class ListsSpec extends AnyFunSpec{
@@ -87,6 +88,116 @@ class ListsSpec extends AnyFunSpec{
           assert(!Lists.isPalindrome(List(1, 2, 3, 4, 5)))
         }
       }
+
+      describe("the solution to P07") {
+        it("should return an empty list for an empty list") {
+          assert(Lists.flatten(List()) == List())
+        }
+
+        it("should return a flat list for a list with one element") {
+          assert(Lists.flatten(List(1)) == List(1))
+        }
+
+        it("should return a flat list for a list with multiple elements") {
+          assert(Lists.flatten(List(1, 2, List(3, 4))) == List(1, 2, 3, 4))
+        }
+
+        it("should return a flat list for a list with nested lists") {
+          assert(Lists.flatten(List(List(1, 2), List(3, List(4, 5)))) == List(1, 2, 3, 4, 5))
+        }
+
+        it("should return a flat list for a list with multiple levels of nesting") {
+          assert(Lists.flatten(List(List(List(1), 2), List(3, List(4, 5)), 6, List(List(7, 8), 9))) == List(1, 2, 3, 4, 5, 6, 7, 8, 9))
+        }
+      }
+
+      describe("the solution to P08") {
+        it("should return an empty list when given an empty list") {
+          assert(Lists.compress(Nil) == Nil)
+        }
+
+        it("should return a list with a single element when given a list with a single element") {
+          assert(Lists.compress(List(1)) == List(1))
+        }
+
+        it("should remove consecutive duplicates") {
+          assert(Lists.compress(List(1, 1, 1, 2, 3, 3)) == List(1, 2, 3))
+        }
+
+        it("should work for symbols as well as numbers") {
+          assert(Lists.compress(List(Symbol("a"), Symbol("a"), Symbol("a"), Symbol("b"), Symbol("c"), Symbol("c"), Symbol("a"), Symbol("a"), Symbol("d"), Symbol("e"), Symbol("e"), Symbol("e"), Symbol("e"))) == List(Symbol("a"), Symbol("b"), Symbol("c"), Symbol("a"), Symbol("d"), Symbol("e")))
+        }
+      }
+
+      describe("the solution to P09") {
+        it("should return an empty list for an empty list") {
+          assert(Lists.pack(List()) == List())
+        }
+
+        it("should return a list of single-element sublists for a list with unique elements") {
+          assert(Lists.pack(List(Symbol("a"), Symbol("b"), Symbol("c"))) == List(List(Symbol("a")), List(Symbol("b")), List(Symbol("c"))))
+        }
+
+        it("should return a list of multiple-element sublists for a list with consecutive duplicates") {
+          assert(Lists.pack(List(Symbol("a"), Symbol("a"), Symbol("b"), Symbol("b"), Symbol("b"), Symbol("c"), Symbol("c"))) == List(List(Symbol("a"), Symbol("a")), List(Symbol("b"), Symbol("b"), Symbol("b")), List(Symbol("c"), Symbol("c"))))
+        }
+
+        it("should return a list of sublists of correct lengths for a list with a mix of consecutive duplicates and unique elements") {
+          assert(Lists.pack(List(Symbol("a"), Symbol("a"), Symbol("b"), Symbol("c"), Symbol("c"), Symbol("d"), Symbol("d"), Symbol("d"), Symbol("d"))) == List(List(Symbol("a"), Symbol("a")), List(Symbol("b")), List(Symbol("c"), Symbol("c")), List(Symbol("d"), Symbol("d"), Symbol("d"), Symbol("d"))))
+        }
+      }
+
+      describe("the solution to P11") {
+        it("should return an empty list for an empty list") {
+          assert(encodeModified(List()) == List())
+        }
+
+        it("should return a list of single-element sublists for a list with unique elements") {
+          assert(encodeModified(List('a', 'b', 'c')) == List(Left('a'), Left('b'), Left('c')))
+        }
+
+        it("should return a list of (count, element) tuples for a list with consecutive duplicates") {
+          assert(encodeModified(List('a', 'a', 'b', 'b', 'b', 'c', 'c')) == List(Right((2,'a')), Right((3,'b')), Right((2,'c'))))
+        }
+
+        it("should return a list of (count, element) tuples and single-element sublists for a list with a mix of consecutive duplicates and unique elements") {
+          assert(encodeModified(List('a', 'a', 'b', 'c', 'c', 'd', 'd', 'd', 'd')) == List(Right((2,'a')), Left('b'), Right((2,'c')), Right((4,'d'))))
+        }
+      }
+    }
+
+    describe("the solution to P12") {
+      it("should return the original list for a list with no consecutive duplicates") {
+        assert(decode(List((1,'a'), (1,'b'), (1,'c'))) == List('a', 'b', 'c'))
+      }
+
+      it("should return a list with consecutive duplicates for a list with (count, element) tuples") {
+        assert(decode(List((2,'a'), (3,'b'), (2,'c'))) == List('a', 'a', 'b', 'b', 'b', 'c', 'c'))
+      }
+
+      it("should return a list with consecutive duplicates and unique elements for a list with mixed (count, element) tuples and single-element lists") {
+        assert(decode(List((2,'a'), (1,'b'), (2,'c'), (4,'d'), (1,'e'))) == List('a', 'a', 'b', 'c', 'c', 'd', 'd', 'd', 'd', 'e'))
+      }
+    }
+  }
+
+  describe("the solution to P13") {
+    it("should return a list of tuples with a count and element for a list with unique elements") {
+      assert(encodeDirect(List('a', 'b', 'c')) == List((1, 'a'), (1, 'b'), (1, 'c')))
+    }
+
+    it("should return a list of tuples with counts and elements for a list with consecutive duplicates") {
+      assert(encodeDirect(List('a', 'a', 'b', 'b', 'b', 'c', 'c')) == List((2, 'a'), (3, 'b'), (2, 'c')))
+    }
+
+    it("should return a list of tuples with counts and elements for a list with non-consecutive duplicates") {
+      assert(encodeDirect(List('a', 'b', 'a', 'c', 'c', 'a', 'a')) == List((1, 'a'), (1, 'b'), (1, 'a'), (2, 'c'), (2, 'a')))
+    }
+  }
+
+  describe("the solution to P14") {
+    it("should return a list with each element duplicated once for a list with unique elements") {
+      assert(duplicate(List('a', 'b', 'c')) == List('a', 'a', 'b', 'b', 'c', 'c'))
     }
   }
 }
