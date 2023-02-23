@@ -156,7 +156,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def encodeModified[A]: List[A] => List[Either[A, (Int, A)]] = (l: List[A]) => pack(l).map(
+    _ match {
+      case s if s.length > 1 => Right((s.length, s(0)))
+      case s => Left(s(0))
+    }
+  )
 
   /** (**) Decode a run-length encoded list.
     *
@@ -169,7 +174,14 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decodeHelper[A]: (Int, A) => List[A] = (count, symbol) => {
+    if (count == 0) Nil
+    else symbol :: decodeHelper(count - 1, symbol)
+  }
+  def decode[A]: List[(Int, A)] => List[A] = _ match {
+    case Nil => Nil
+    case (cnt, sym) :: tail => decodeHelper(cnt, sym) ::: decode(tail) 
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -182,7 +194,16 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The directly encoded result stored in a list.
     */
-  def encodeDirect[A]: List[A] => List[(Int, A)] = ???
+  List(List(1, 2, 3), List(1, 2, 3))
+  def encodeDirectHelper[A]: (Int, A, List[A]) => List[(Int, A)] = (cnt, sym, l) => l match{
+    case Nil => List((cnt, sym))
+    case head :: tail if head == sym => encodeDirectHelper(cnt + 1, sym, tail)
+    case head :: tail => List((cnt, sym)) ::: encodeDirectHelper(1, head, tail) 
+  }
+  def encodeDirect[A]: List[A] => List[(Int, A)] = _ match {
+    case Nil => Nil
+    case head :: tail => encodeDirectHelper(1, head, tail)
+  }
 
   /** (*) Duplicate the elements of a list.
     *
@@ -194,7 +215,10 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
+  def duplicate[A]: List[A] => List[A] =  {
+    case Nil => Nil
+    case head :: tail => head :: head :: duplicate(tail)
+  }
 
   /** (**) Duplicate the elements of a list a given number of times.
     *

@@ -93,5 +93,56 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
+    describe("the solution to encodeModified") {
+      it("should return encodeModified List") {
+        assert(Lists.encodeModified(List()) == Nil)
+        assert( Lists.encodeModified(List(1)) == List(Left(1)))
+        assert(Lists.encodeModified(List(1, 2)) == List(Left(1), Left(2)))
+        assert(
+          Lists.encodeModified(List("a", "a", "a", "a", "b", "c", "c", "a", "a", "d", "e", "e", "e", "e")) 
+          == List(Right((4,"a")), Left("b"), Right((2,"c")), Right((2,"a")), Left("d"), Right((4,"e")))
+          )
+      }
+    }
+
+    describe("the solution to decode") {
+      it("should return decoded List") {
+        assert(
+          Lists.decode(List((4, "a"), (1, "b"), (2, "c"), (2, "a"), (1, "d"), (4, "e")))
+          == List("a", "a", "a", "a", "b", "c", "c", "a", "a", "d", "e", "e", "e", "e")
+        )
+        assert(Lists.decode(List()) == Nil)
+        assert(Lists.decode(List((1, "b"))) == List("b"))
+        assert(Lists.decode(List((1, 2), (2, 3))) == List(2, 3, 3))
+        assert(
+          Lists.decode(
+            List(
+              (2, List("a", "a", "a")), (3, "BC"), (1, List("a", 3))
+            )
+          ) == List(List("a", "a", "a"), List("a", "a", "a"), "BC", "BC", "BC", List("a", 3))
+        )
+      }
+    }
+
+
+    describe("the solution to encodeDirectEncode") {
+
+      it("should return decoded List") {
+        assert(Lists.encodeDirect(List()) == Nil)
+        assert(Lists.encodeDirect(List(1)) == List((1, 1)))
+        assert(Lists.encodeDirect(List(1, 2)) == List((1 ,1), (1, 2)))
+        assert(Lists.encodeDirect(
+          List("a", "a", "a", "a", "b", "c", "c", "a", "a", "d", "e", "e", "e", "e")
+          ) == List((4,"a"), (1,"b"), (2,"c"), (2,"a"), (1, "d"), (4,"e")))
+      }
+    }
+
+    describe("the solution to duplicate") {
+      it("should return duplicated list") {
+        assert(
+          Lists.duplicate(List("a", "b", "c", "c", "d")) == List("a", "a", "b", "b", "c", "c", "c", "c", "d", "d")
+        )
+      }
+    }
   }
 }
