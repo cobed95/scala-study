@@ -193,16 +193,16 @@ object Lists {
     * @return A new run-length encoded list.
     */
 
-  def _encode[A]: (List[A], Int, A, List[(Int, A)]) => List[(Int, A)] = {
-    case (head :: tail, 0, _, res) => _encode(tail, 1, head, res)
+  def encodeIter[A]: (List[A], Int, A, List[(Int, A)]) => List[(Int, A)] = {
+    case (head :: tail, 0, _, res) => encodeIter(tail, 1, head, res)
     case (Nil, 0, _, res) => res
-    case (Nil, len, latest, res) => _encode(Nil, 0, latest, (len, latest) :: res)
-    case (head :: tail, len, latest, res) if head == latest => _encode(tail, len + 1, latest, res)
-    case (head :: tail, len, latest, res) => _encode(tail, 1, head, (len, latest):: res)
+    case (Nil, len, latest, res) => encodeIter(Nil, 0, latest, (len, latest) :: res)
+    case (head :: tail, len, latest, res) if head == latest => encodeIter(tail, len + 1, latest, res)
+    case (head :: tail, len, latest, res) => encodeIter(tail, 1, head, (len, latest):: res)
   }
 
   def encode[A]: List[A] => List[(Int, A)] = {
-    a => reverse(_encode(a, 0, a.head, Nil))
+    a => reverse(encodeIter(a, 0, a.head, Nil))
   }
 
   /** (*) Modified run-length encoding.
@@ -218,16 +218,16 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def _encodeModified[A]: (List[A], List[Either[A, (Int, A)]]) => List[Either[A, (Int, A)]] = {
-    case (left_head :: left_tail, Right((right_head_len, right_head_el)) :: right_tail) if left_head == right_head_el => _encodeModified(left_tail, Right((right_head_len + 1, right_head_el)) :: right_tail)
-    case (left_head :: left_tail, Left(right_head) :: right_tail) if left_head == right_head  => _encodeModified(left_tail, Right((2, right_head)) :: right_tail)
-    case (left_head :: left_tail, right) => _encodeModified(left_tail, Left(left_head) :: right)
+  def encodeModifiedIter[A]: (List[A], List[Either[A, (Int, A)]]) => List[Either[A, (Int, A)]] = {
+    case (left_head :: left_tail, Right((right_head_len, right_head_el)) :: right_tail) if left_head == right_head_el => encodeModifiedIter(left_tail, Right((right_head_len + 1, right_head_el)) :: right_tail)
+    case (left_head :: left_tail, Left(right_head) :: right_tail) if left_head == right_head  => encodeModifiedIter(left_tail, Right((2, right_head)) :: right_tail)
+    case (left_head :: left_tail, right) => encodeModifiedIter(left_tail, Left(left_head) :: right)
     case (Nil, right) => right
   }
 
   // List(Right((4,a)), Left(b), Right((2,c)), Right((2,a)), Left(d), Right((4,e))) ????
   def encodeModified[A]: List[A] => List[Either[A, (Int, A)]] = {
-    case head :: tail => reverse(_encodeModified(tail, List(Left(head))))
+    case head :: tail => reverse(encodeModifiedIter(tail, List(Left(head))))
     case Nil => Nil
   }
 
@@ -244,8 +244,8 @@ object Lists {
     */
   def decode[A]: List[(Int, A)] => List[A] = {
     case Nil => Nil
-    case (len, el) :: Nil => List.fill(len)(el)
-    case (len, el) :: tail => List.fill(len)(el) ::: decode(tail)
+    case (len, el) :: Nil => fill(len, el)
+    case (len, el) :: tail => fill(len, el) ::: decode(tail)
   }
 
   /** (**) Run-length encoding of a list (direct solution).
@@ -259,15 +259,21 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The directly encoded result stored in a list.
     */
-  def _encodeDirect[A]: (List[A], List[(Int, A)]) => List[(Int, A)] = {
-    case (left_head :: left_tail, (right_head_len, right_head_el) :: right_tail) if left_head == right_head_el => _encodeDirect(left_tail, (right_head_len + 1, right_head_el) :: right_tail)
-    case (left_head :: left_tail, right) => _encodeDirect(left_tail, (1, left_head) :: right)
+
+  def fill[A]: (Int, A) => List[A] = {
+    case (len, el) if len > 0 => el :: fill(len - 1, el)
+    case _ => Nil
+  }
+
+  def encodeDirectIter[A]: (List[A], List[(Int, A)]) => List[(Int, A)] = {
+    case (left_head :: left_tail, (right_head_len, right_head_el) :: right_tail) if left_head == right_head_el => encodeDirectIter(left_tail, (right_head_len + 1, right_head_el) :: right_tail)
+    case (left_head :: left_tail, right) => encodeDirectIter(left_tail, (1, left_head) :: right)
     case (Nil, right) => right
   }
 
   def encodeDirect[A]: List[A] => List[(Int, A)] = {
     case Nil => Nil
-    case head :: tail => reverse(_encodeDirect(tail, List((1, head))))
+    case head :: tail => reverse(encodeDirectIter(tail, List((1, head))))
   }
 
   /** (*) Duplicate the elements of a list.
