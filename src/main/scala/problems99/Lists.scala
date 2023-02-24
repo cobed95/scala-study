@@ -218,7 +218,18 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def _encodeModified[A]: (List[A], List[Either[A, (Int, A)]]) => List[Either[A, (Int, A)]] = {
+    case (left_head :: left_tail, Right((right_head_len, right_head_el)) :: right_tail) if left_head == right_head_el => _encodeModified(left_tail, Right((right_head_len + 1, right_head_el)) :: right_tail)
+    case (left_head :: left_tail, Left(right_head) :: right_tail) if left_head == right_head  => _encodeModified(left_tail, Right((2, right_head)) :: right_tail)
+    case (left_head :: left_tail, right) => _encodeModified(left_tail, Left(left_head) :: right)
+    case (Nil, right) => right
+  }
+
+  // List(Right((4,a)), Left(b), Right((2,c)), Right((2,a)), Left(d), Right((4,e))) ????
+  def encodeModified[A]: List[A] => List[Either[A, (Int, A)]] = {
+    case head :: tail => reverse(_encodeModified(tail, List(Left(head))))
+    case Nil => Nil
+  }
 
   /** (**) Decode a run-length encoded list.
     *
@@ -231,7 +242,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decode[A]: List[(Int, A)] => List[A] = {
+    case Nil => Nil
+    case (len, el) :: Nil => List.fill(len)(el)
+    case (len, el) :: tail => List.fill(len)(el) ::: decode(tail)
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -244,7 +259,16 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The directly encoded result stored in a list.
     */
-  def encodeDirect[A]: List[A] => List[(Int, A)] = ???
+  def _encodeDirect[A]: (List[A], List[(Int, A)]) => List[(Int, A)] = {
+    case (left_head :: left_tail, (right_head_len, right_head_el) :: right_tail) if left_head == right_head_el => _encodeDirect(left_tail, (right_head_len + 1, right_head_el) :: right_tail)
+    case (left_head :: left_tail, right) => _encodeDirect(left_tail, (1, left_head) :: right)
+    case (Nil, right) => right
+  }
+
+  def encodeDirect[A]: List[A] => List[(Int, A)] = {
+    case Nil => Nil
+    case head :: tail => reverse(_encodeDirect(tail, List((1, head))))
+  }
 
   /** (*) Duplicate the elements of a list.
     *
@@ -256,9 +280,14 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
 
-  /** (**) Duplicate the elements of a list a given number of times.
+  def duplicate[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case head :: Nil => List.fill(2)(head)
+    case head :: tail => List.fill(2)(head) ::: duplicate(tail)
+  }
+
+  /** (**) Duplicate the elements of a li7st a given number of times.
     *
     * Example: {{{
     *   duplicateN(3, List('a, 'b, 'c, 'c, 'd))
@@ -268,7 +297,11 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with n duplicates.
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+  def duplicateN[A]: (Int, List[A]) => List[A] = {
+    case (_, Nil) => Nil
+    case (n, head :: Nil) => List.fill(n)(head)
+    case (n, head :: tail) => List.fill(n)(head) ::: duplicateN(n, tail)
+  }
 
   /** (**) Drop every Nth element from a list.
     *

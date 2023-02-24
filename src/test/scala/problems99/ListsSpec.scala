@@ -120,6 +120,35 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
+    describe("the solution to P11") {
+      it("just print") {
+        println(Lists.encodeModified(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e')))
+      }
+      it("should return encoded list") {
+        assert(
+          Lists.encodeModified(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+            == List((4,'a'), 'b', (2,'c'), (2,'a'), 'd', (4,'e'))
+        )
+      }
+    }
+
+    describe("the solution to P12") {
+      it("should return decoded list") {
+        assert(
+          Lists.decode(List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e')))
+            == List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e')
+        )
+      }
+    }
+
+    describe("the solution to P13") {
+      it("should return encoded list") {
+        assert(
+          Lists.encodeDirect(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        )
+      }
+    }
 
   }
 }
