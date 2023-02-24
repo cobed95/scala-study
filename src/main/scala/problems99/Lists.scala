@@ -198,7 +198,7 @@ object Lists {
   def encodeDirectHelper[A]: (Int, A, List[A]) => List[(Int, A)] = (cnt, sym, l) => l match{
     case Nil => List((cnt, sym))
     case head :: tail if head == sym => encodeDirectHelper(cnt + 1, sym, tail)
-    case head :: tail => List((cnt, sym)) ::: encodeDirectHelper(1, head, tail) 
+    case head :: tail => (cnt, sym) :: encodeDirectHelper(1, head, tail) 
   }
   def encodeDirect[A]: List[A] => List[(Int, A)] = _ match {
     case Nil => Nil
