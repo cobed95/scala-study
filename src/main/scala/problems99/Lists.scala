@@ -266,7 +266,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with n duplicates.
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+  def duplicateN[A]: (Int, List[A]) => List[A] = { (x, ls) =>
+    fold[A, List[A]](ls, List(), {
+      case (b, a) if x > 0 => a :: duplicateN(x - 1, List(a)) ::: b
+      case _               => Nil
+    })
+  }
 
   /** (**) Drop every Nth element from a list.
     *
@@ -278,7 +283,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with every Nth element dropped.
     */
-  def drop[A]: (Int, List[A]) => List[A] = ???
+  def drop[A]: (Int, List[A]) => List[A] = { (x, ls) =>
+    fold[A, (Int, Int, List[A])](ls, (x, 1, List()), {
+      case ((x, y, z), a) if x == y => (x, 1, z)
+      case ((x, y, z), a)           => (x, y + 1, a :: z)
+    })._3
+  }
 
   /** (*) Split a list into two parts.
     *
@@ -291,5 +301,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = { (x, ls) =>
+    fold[A, (Int, Int, (List[A], List[A]))](ls, (x, 0, (List(), List())), {
+      case ((x, y, (z1, z2)), a) if y < x => (x, y + 1, (z1, a :: z2))
+      case ((x, y, (z1, z2)), a)          => (x, y + 1, (a :: z1, z2))
+    })._3
+  }
 }

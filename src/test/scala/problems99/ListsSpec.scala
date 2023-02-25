@@ -162,5 +162,26 @@ class ListsSpec extends AnyFunSpec {
         assert(Lists.duplicate(List(1, 2, 1)) == List(1, 1, 2, 2, 1, 1))
       }
     }
+
+    describe("the solution to P15") {
+      it("should return n duplicated list") {
+        assert(Lists.duplicateN(2, List(1, 2, 1)) == List(1, 1, 2, 2, 1, 1))
+      }
+    }
+
+    describe("the solution to P16") {
+      it("should return dropped list") {
+        assert(Lists.drop(2, List(1, 2, 3, 4)) == List(1, 3))
+      }
+    }
+
+    describe("the solution to P17") {
+      it("should return split list") {
+        assert(
+          Lists
+            .split(3, List(1, 2, 3, 4, 5, 6)) == (List(1, 2, 3), List(4, 5, 6))
+        )
+      }
+    }
   }
 }
