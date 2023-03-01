@@ -144,5 +144,35 @@ class ListsSpec extends AnyFunSpec{
         )
       }
     }
+
+    describe("the solution to duplicateNHelper") {
+      it("should return duplicated list") {
+
+        assert(
+          Lists.duplicateN(3, List("a", "b", "c", "c", "d"))
+           == List("a", "a","a", "b", "b", "b", "c", "c","c", "c", "c", "c", "d", "d","d")
+        )
+      }
+    }
+
+    describe("the solution to drop") {
+      it("should return duplicated list") {
+
+        assert(
+          Lists.drop(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+          == List("a", "b", "d", "e", "g", "h", "j", "k")
+        )
+      }
+    }
+
+
+    describe("the solution to drop") {
+      it("should return duplicated list") {
+        assert(
+          Lists.split(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+          == (List("a", "b", "c"),List("d", "e", "f", "g", "h", "i", "j", "k"))
+        )
+      }
+    }
   }
 }

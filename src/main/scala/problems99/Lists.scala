@@ -230,7 +230,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with n duplicates.
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+
+  def duplicateNHelper[A](n: Int, cur: Int, l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case head :: tail if cur == 0 => duplicateNHelper(n, n, tail)
+    case head :: tail => head :: duplicateNHelper(n, cur-1, head::tail)
+  }
+  def duplicateN[A]: (Int, List[A]) => List[A] = (n, l) => duplicateNHelper(n, n, l)
 
   /** (**) Drop every Nth element from a list.
     *
@@ -242,8 +248,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with every Nth element dropped.
     */
-  def drop[A]: (Int, List[A]) => List[A] = ???
-
+  def dropHelper[A](n: Int, cur: Int, l: List[A]): List[A] = l match {
+    case Nil => Nil
+    case _ :: tail if cur == 1 => dropHelper(n, n, tail)
+    case head :: tail => head :: dropHelper(n, cur-1, tail) 
+  }
+  def drop[A]: (Int, List[A]) => List[A] = (n, l) => dropHelper(n, n, l)
   /** (*) Split a list into two parts.
     *
     * The length of the first part is given. Use a Tuple for your result.
@@ -255,5 +265,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def splitHelper[A](n: Int, l: List[A], r: List[A]): (List[A], List[A]) = r match {
+    case Nil => (Nil, Nil)
+    case head :: tail if n <= 0 => (l.reverse, r) 
+    case head :: tail => splitHelper(n-1, head :: l, tail)
+  }
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = (i: Int, l: List[A]) => splitHelper(i, Nil, l)
 }
