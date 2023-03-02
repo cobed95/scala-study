@@ -105,7 +105,9 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return True if the list is a palindrome, false otherwise
     */
-  def isPalindrome[A <: Equals]: List[A] => Boolean = ls => (ls zip reverse(ls)) forall (_ == _)
+  def isPalindrome[A <: Equals]: List[A] => Boolean = ls => (ls zip reverse(ls)) forall {
+    case (a, b) => a == b
+  }
 
   /** (**) Flatten a nested list structure
     *
@@ -207,7 +209,10 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ls => encode(ls) map {
+    case (n, el) if n == 1 => Left(el)
+    case el => Right(el)
+  }
 
   /** (**) Decode a run-length encoded list.
     *
@@ -220,7 +225,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decode[A]: List[(Int, A)] => List[A] = {
+    case Nil => Nil
+    case (n, _) :: tl if n <= 0 => decode(tl)
+    case (n, el) :: tl => el :: decode((n - 1, el) :: tl)
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -245,7 +254,18 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
+  def duplicate[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case hd :: tl => hd :: hd :: duplicate(tl)
+  }
+
+  def duplicateNIter[A](remaining: Int)(shouldRepeat: Int, ls: List[A]): List[A] =
+    (remaining, shouldRepeat, ls) match {
+      case (_, s, _) if s <= 0 => ls
+      case (_, _, Nil) => Nil
+      case (r, _, _ :: tl) if r <= 0 => duplicateNIter(shouldRepeat)(shouldRepeat, tl)
+      case (r, s, hd :: _) => hd :: duplicateNIter(r - 1)(s, ls)
+    }
 
   /** (**) Duplicate the elements of a list a given number of times.
     *
@@ -257,7 +277,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with n duplicates.
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+  def duplicateN[A]: (Int, List[A]) => List[A] = (n, ls) => duplicateNIter(n)(n, ls)
 
   /** (**) Drop every Nth element from a list.
     *
@@ -269,7 +289,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with every Nth element dropped.
     */
-  def drop[A]: (Int, List[A]) => List[A] = ???
+  def drop[A]: (Int, List[A]) => List[A] = (n, ls) => ls.foldLeft((1, List[A]())) {
+    case ((m, acc), _) if m == n => (1, acc)
+    case ((m, acc), hd) => (m + 1, hd :: acc)
+  } match {
+    case (_, acc) => reverse(acc)
+  }
+
 
   /** (*) Split a list into two parts.
     *
@@ -282,5 +308,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = (n, ls) => ls.foldLeft((n, List[A](), List[A]())) {
+    case ((n, l, r), hd) if n <= 0 => (n, l, hd :: r)
+    case ((n, l, r), hd) => (n - 1, hd :: l, r)
+  } match {
+    case (_, l, r) => (reverse(l), reverse(r))
+  }
 }
