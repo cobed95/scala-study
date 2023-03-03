@@ -303,8 +303,45 @@ object Lists {
     */
   def split[A]: (Int, List[A]) => (List[A], List[A]) = { (x, ls) =>
     fold[A, (Int, Int, (List[A], List[A]))](ls, (x, 0, (List(), List())), {
-      case ((x, y, (z1, z2)), a) if y < x => (x, y + 1, (z1, a :: z2))
-      case ((x, y, (z1, z2)), a)          => (x, y + 1, (a :: z1, z2))
+      case ((x, y, (z1, z2)), a) if y < length(ls) - x =>
+        (x, y + 1, (z1, a :: z2))
+      case ((x, y, (z1, z2)), a) => (x, y + 1, (a :: z1, z2))
     })._3
+  }
+
+  def slice[A]: (Int, Int, List[A]) => List[A] = { (x1, x2, ls) =>
+    fold[A, (Int, List[A])](ls, (0, List()), {
+      case ((x, z), a) if x1 <= x && x < x2 => (x + 1, a :: z)
+      case ((x, z), a)                      => (x + 1, z)
+    })._2
+  }
+
+  def rotate[A]: (Int, List[A]) => List[A] = {
+    case (x, ls) if x > 0 =>
+      split(x, ls) match {
+        case (ls1, ls2) => ls2 ::: ls1
+      }
+    case (x, ls) =>
+      split(length(ls) + x, ls) match {
+        case (ls1, ls2) => ls2 ::: ls1
+      }
+  }
+
+  def removeAt[A]: (Int, List[A]) => (List[A], A) = { (x, ls) =>
+    split(x, ls) match {
+      case (ls1, y :: ls2) => (ls1 ::: ls2, y)
+    }
+  }
+
+  def insertAt[A]: (A, Int, List[A]) => List[A] = { (x, y, ls) =>
+    split(y, ls) match {
+      case (ls1, ls2) => ls1 ::: x :: ls2
+    }
+  }
+
+  def range[A]: (Int, Int) => List[Int] = {
+    case (x1, x2) if x1 == x2 => List(x2)
+    case (x1, x2) if x1 < x2  => x1 :: range(x1 + 1, x2)
+    case _                    => Nil
   }
 }

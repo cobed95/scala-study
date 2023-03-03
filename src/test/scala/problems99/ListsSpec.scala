@@ -183,5 +183,46 @@ class ListsSpec extends AnyFunSpec {
         )
       }
     }
+
+    describe("the solution to P18") {
+      it("should return sliced list") {
+        assert(Lists.slice(1, 5, List(1, 2, 3, 4, 5, 6)) == List(2, 3, 4, 5))
+      }
+    }
+
+    describe("the solution to P19") {
+      it("should return rotated list 1") {
+        assert(
+          Lists.rotate(2, List(1, 2, 3, 4, 5, 6)) == List(3, 4, 5, 6, 1, 2)
+        )
+      }
+      it("should return rotated list 2") {
+        assert(
+          Lists.rotate(-5, List(1, 2, 3, 4, 5, 6)) == List(2, 3, 4, 5, 6, 1)
+        )
+      }
+    }
+
+    describe("the solution to P20") {
+      it("should return removed at and list") {
+        assert(
+          Lists.removeAt(2, List(1, 2, 3, 4, 5, 6)) == (List(1, 2, 4, 5, 6), 3)
+        )
+      }
+    }
+
+    describe("the solution to P21") {
+      it("should return inserted at list") {
+        assert(
+          Lists.insertAt(3, 2, List(1, 2, 4, 5, 6)) == List(1, 2, 3, 4, 5, 6)
+        )
+      }
+    }
+
+    describe("the solution to P22") {
+      it("should return range list") {
+        assert(Lists.range(2, 5) == List(2, 3, 4, 5))
+      }
+    }
   }
 }
