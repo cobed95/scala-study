@@ -271,4 +271,50 @@ object Lists {
     case head :: tail => splitHelper(n-1, head :: l, tail)
   }
   def split[A]: (Int, List[A]) => (List[A], List[A]) = (i: Int, l: List[A]) => splitHelper(i, Nil, l)
+
+  def slice[A]: (Int, Int , List[A]) => List[A] = (i: Int, j: Int, l: List[A]) => l.zipWithIndex.foldLeft(List[A]()) {
+    (acc, x) => x match {
+      case (elem,idx) if (idx >= i && idx < j) => elem :: acc
+      case _ => acc
+    }
+  }.reverse
+
+  def rotateN[A]: (Int, List[A]) => List[A] = (i: Int, l: List[A]) => i match {
+    case i if i < 0 => rotateN(l.length + i, l)
+    case _ => {
+      val (left, right) = l.zipWithIndex.foldLeft((List[A](), List[A]())) {
+        (acc, x) => x match {
+          case (elem, idx) if idx < i => (elem :: acc._1, acc._2)
+          case (elem, idx) => (acc._1, elem :: acc._2)
+        }
+      }
+      right.reverse ::: left.reverse
+    }
+  }
+
+  def removeAt[A]: (Int, List[A]) => (List[A], A) = (i: Int, l: List[A]) => l match {
+    case Nil => (l.tail, l.head)
+    case head :: tail if i <= 0 => (tail, head)
+    case head :: tail => {
+      var (l, removed) = removeAt(i-1, tail)
+      (head :: l, removed)
+    }
+  }
+
+  def insertAt[A]: (A, Int, List[A]) => List[A] = (elem: A, idx: Int, l: List[A]) => l match {
+    case Nil => List(elem)
+    case head :: tail if idx <= 0 => elem :: l
+    case head :: tail => head :: insertAt(elem, idx-1, tail)
+  }
+
+    def insertAt[A]: (A, Int, List[A]) => List[A] = (elem: A, idx: Int, l: List[A]) => l match {
+    case Nil => List(elem)
+    case head :: tail if idx <= 0 => elem :: l
+    case head :: tail => head :: insertAt(elem, idx-1, tail)
+  }
+
+  def range(i: Int, j: Int): List[Int] = i match {
+    case i if i > j => Nil
+    case _ => i :: range(i+1, j)
+  }
 }

@@ -165,14 +165,56 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
-
     describe("the solution to drop") {
-      it("should return duplicated list") {
+      it("should return drop list") {
         assert(
           Lists.split(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
           == (List("a", "b", "c"),List("d", "e", "f", "g", "h", "i", "j", "k"))
         )
       }
     }
+
+    describe("the solution to split") {
+      it("should return slice list") {
+        assert(
+          Lists.slice(3, 7, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+          == List("d", "e", "f", "g")
+        )
+      }
+    }
+
+    describe("the solution to rotateN") {
+      it("should return rotateN list") {
+        assert(
+          Lists.rotateN(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+          == List("d", "e", "f", "g", "h", "i", "j", "k", "a", "b", "c")
+        )
+
+        assert(
+          Lists.rotateN(-2, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+          == List("j", "k", "a", "b", "c", "d", "e", "f", "g", "h", "i")
+        )
+      }
+    }
+
+    describe("the solution to removeKth") {
+      it("should return removeKth list") {
+        assert(
+          Lists.removeAt(1, List("a", "b", "c", "d"))
+          == (List("a", "c", "d"), "b")
+        )
+      }
+    }
+
+    describe("the solution to insertAt") {
+      it("should return insertAt list") {
+        assert(
+          Lists.insertAt("new", 1, List("a", "b", "c", "d"))
+          == List("a", "new", "b", "c", "d")
+        )
+      }
+    }
+
+
   }
 }
