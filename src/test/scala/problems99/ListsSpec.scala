@@ -1,7 +1,7 @@
 package org.laplacetec.study
 package problems99
 
-import org.laplacetec.study.problems99.Lists.{compress, decode, duplicate, encodeDirect, encodeModified}
+import org.laplacetec.study.problems99.Lists.{compress, decode, duplicate, encodeDirect, encodeModified, insertAt, removeAt, rotate, slice, range}
 import org.scalatest.funspec.AnyFunSpec
 
 class ListsSpec extends AnyFunSpec{
@@ -198,6 +198,57 @@ class ListsSpec extends AnyFunSpec{
   describe("the solution to P14") {
     it("should return a list with each element duplicated once for a list with unique elements") {
       assert(duplicate(List('a', 'b', 'c')) == List('a', 'a', 'b', 'b', 'c', 'c'))
+    }
+  }
+
+  describe("slice function") {
+    it("should return the correct sublist for a list with valid indices") {
+      assert(slice(List(1, 2, 3, 4, 5, 6, 7, 8, 9), 2, 5) == List(3, 4, 5))
+    }
+
+    it("should return the correct sublist for a list with valid indices2") {
+      assert(slice(List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), 3, 7) == List('d', 'e', 'f', 'g'))
+    }
+  }
+
+  describe("rotate function") {
+    it("should correctly rotate a non-empty list by a positive amount") {
+      assert(rotate(3, List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')) == List('d', 'e', 'f', 'g', 'h', 'a', 'b', 'c'))
+    }
+
+    it("should correctly rotate a non-empty list by a negative amount") {
+      assert(rotate(-2, List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')) == List('g', 'h', 'a', 'b', 'c', 'd', 'e', 'f'))
+    }
+
+    it("should return the original list when rotating by zero") {
+      assert(rotate(0, List(1, 2, 3)) == List(1, 2, 3))
+    }
+
+    it("should return the original list when rotating by a multiple of the list length") {
+      assert(rotate(6, List(1, 2, 3, 4, 5)) == List(1, 2, 3, 4, 5))
+    }
+  }
+
+  describe("removeAt function") {
+    it("should remove the element at the given index and return the result as a tuple") {
+      assert(removeAt(1, List('a', 'b', 'c', 'd', 'e')) == ('b', List('a', 'c', 'd', 'e')))
+      assert(removeAt(3, List(1, 2, 3, 4, 5)) == (4, List(1, 2, 3, 5)))
+    }
+  }
+
+  describe("insertAt function") {
+    it("should insert an element at the given index and return the resulting list") {
+      assert(insertAt('X', 1, List('a', 'b', 'c', 'd')) == List('a', 'X', 'b', 'c', 'd'))
+      assert(insertAt(10, 0, List(1, 2, 3, 4)) == List(10, 1, 2, 3, 4))
+      assert(insertAt("foo", 2, List("bar", "baz", "qux")) == List("bar", "baz", "foo", "qux"))
+    }
+  }
+
+  describe("range function") {
+    it("should generate a list of integers from a starting value to an ending value") {
+      assert(range(1, 5) == List(1, 2, 3, 4, 5))
+      assert(range(-3, 3) == List(-3, -2, -1, 0, 1, 2, 3))
+      assert(range(0, 0) == List(0))
     }
   }
 }

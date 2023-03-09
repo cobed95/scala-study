@@ -214,7 +214,6 @@ object Lists {
     */
   def decode[A]: List[(Int, A)] => List[A] = {
     case (len, el) :: tl if len != 0 => el :: decode((len - 1, el) :: tl)
-    case (len, el) :: Nil if len != 0 => el :: decode((len - 1, el) :: Nil)
     case _ :: Nil => Nil
     case _ :: tl => decode(tl)
   }
@@ -232,8 +231,8 @@ object Lists {
     */
   def dataCompression[A]: ((Int, A), List[A]) => List[(Int, A)] = {
     case (res, Nil) => res :: Nil
-    case ((len, hdRes), hdIter :: Nil) if hdRes == hdIter => dataCompression((len + 1, hdRes), Nil)
-    case (res, hdIter :: Nil) => res :: dataCompression((1, hdIter), Nil)
+//    case ((len, hdRes), hdIter :: Nil) if hdRes == hdIter => dataCompression((len + 1, hdRes), Nil)
+//    case (res, hdIter :: Nil) => res :: dataCompression((1, hdIter), Nil)
     case ((len, hdRes), hdIter :: tlIter) if hdRes == hdIter => dataCompression((len + 1, hdRes), tlIter)
     case (res, hdIter :: tlIter) => res :: dataCompression((1, hdIter), tlIter)
   }
@@ -253,44 +252,99 @@ object Lists {
     * @return The list with duplicated elements.
     */
   def duplicate[A]: List[A] => List[A] = {
-    case hd :: Nil => hd :: hd :: Nil
+    case Nil => Nil
     case hd :: tl => hd :: hd :: duplicate(tl)
   }
 
-  /** (**) Duplicate the elements of a list a given number of times.
+  /**
+    * P18 (**) Extract a slice from a list.
+    * Given two indices, I and K, the slice is the list containing the elements from and including the Ith element up to
+    * but not including the Kth element of the original list. Start counting the elements with 0.
     *
-    * Example: {{{
-    *   duplicateN(3, List('a, 'b, 'c, 'c, 'd))
-    *   //  res0: List[Symbol] = List('a, 'a, 'a, 'b, 'b, 'b, 'c, 'c, 'c, 'c, 'c, 'c, 'd, 'd, 'd)
-    * }}}
+    * Example:
+    * scala> slice(List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'), 3, 7)
+    * res0: List[Char] = List(d, e, f, g)
     *
-    * @tparam A The type of the list's elements.
-    * @return The list with n duplicates.
+    * @param list the list to extract a slice from
+    * @param start the index of the first element to include in the slice
+    * @param end the index of the first element to exclude from the slice
+    * @tparam A the type of elements in the list
+    * @return the slice of the original list
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+  def slice[A](list: List[A], start: Int, end: Int): List[A] = list match {
+    case hd :: tl => sliceIter((0, hd), tl, start, end)
+  }
 
-  /** (**) Drop every Nth element from a list.
-    *
-    * Example: {{{
-    *   drop(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
-    *   // res0: List[Symbol] = List('a, 'b, 'd, 'e, 'g, 'h, 'j, 'k)
-    * }}}
-    *
-    * @tparam A The type of the list's elements.
-    * @return The list with every Nth element dropped.
-    */
-  def drop[A]: (Int, List[A]) => List[A] = ???
+  def sliceIter[A]: ((Int, A), List[A], Int, Int) => List[A] = {
+    case ((idx, _), hdIter :: tlIter, start, end) if idx < start => sliceIter((idx + 1, hdIter), tlIter, start, end)
+    case ((idx, _), _, _, end) if idx >= end => Nil
+    case ((idx, hd), hdIter :: tl, start, end) => hd :: sliceIter((idx + 1, hdIter), tl, start, end)
+  }
 
-  /** (*) Split a list into two parts.
+  /**
+    * P19 (**) Rotate a list N places to the left.
+    * Examples:
+    * scala> rotate(3, List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'))
+    * res0: List[Char] = List(d, e, f, g, h, a, b, c)
     *
-    * The length of the first part is given. Use a Tuple for your result.
-    * Example: {{{
-    *   split(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
-    *   // res0: (List[Symbol], List[Symbol]) = (List('a, 'b, 'c),List('d, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
-    * }}}
-    *
-    * @tparam A The type of the list's elements.
-    * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
+    * scala> rotate(-2, List('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'))
+    * res1: List[Char] = List(g, h, a, b, c, d, e, f)
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def rotate[A](n: Int, ls: List[A]): List[A] = ls match {
+    case hd :: tl if n >= 0 => rotateIter(hd :: Nil, tl, n - 1)
+    case hd :: tl => rotateIter(hd :: Nil, tl, tl.length + n)
+  }
+
+  def rotateIter[A]: (List[A], List[A], Int) => List[A] = {
+    case (stack, hd :: tl, n) if n != 0 => rotateIter(hd :: stack, tl, n - 1)
+    case (stack, ls, _) => ls ::: reverse(stack)
+  }
+
+  /**
+    * Removes the element at the given index from a list.
+    * Returns a tuple containing the element removed and the resulting list.
+    *
+    * scala> removeAt(1, List('a, 'b, 'c, 'd))
+    * res0: (List[Symbol], Symbol) = (List('a, 'c, 'd),'b)
+    *
+    * @param n the index of the element to remove
+    * @param list the list to remove the element from
+    * @tparam A the type of elements in the list
+    * @return a tuple containing the element removed and the resulting list
+    */
+  def removeAt[A](n: Int, list: List[A]): (A, List[A]) = list match {
+    case hd :: tl if n == 0 => (hd, tl)
+    case hd :: tl => removeAtIter(n - 1, tl, hd :: Nil)
+  }
+
+  def removeAtIter[A]: (Int, List[A], List[A]) => (A, List[A]) = {
+    case (n, hd :: tl, stack) if n == 0 => (hd, reverse(stack) ::: tl)
+    case (n, hd :: tl, stack) => removeAtIter(n - 1, tl, hd :: stack)
+  }
+
+  /**
+    * Inserts an element at the given position in a list.
+    *
+    * @param elem the element to insert
+    * @param n the position to insert the element at (0-indexed)
+    * @param list the list to insert the element into
+    * @tparam A the type of elements in the list
+    * @return the resulting list after the element has been inserted
+    */
+  def insertAt[A](elem: A, n: Int, list: List[A]): List[A] = list match {
+    case ls if n == 0 => elem :: ls
+    case hd :: tl => hd :: insertAt(elem, n - 1, tl)
+  }
+
+  /**
+    * Generates a list of integers from a starting value to an ending value (inclusive).
+    *
+    * @param start the starting value of the range
+    * @param end the ending value of the range
+    * @return a list of integers from `start` to `end` (inclusive)
+    */
+  def range(start: Int, end: Int): List[Int] = {
+    if (start > end) return Nil
+    start :: range(start + 1, end)
+  }
 }
