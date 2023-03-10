@@ -2,6 +2,7 @@ package org.laplacetec.study
 package problems99
 
 import scala.annotation.tailrec
+import scala.util.Random
 import scala.util.chaining.scalaUtilChainingOps
 
 object Lists {
@@ -308,12 +309,19 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = (n, ls) => ls.foldLeft((n, List[A](), List[A]())) {
-    case ((n, l, r), hd) if n <= 0 => (n, l, hd :: r)
-    case ((n, l, r), hd) => (n - 1, hd :: l, r)
-  } match {
-    case (_, l, r) => (reverse(l), reverse(r))
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = (n, ls) => {
+    if (n < 0) split(n + length(ls), ls)
+    else ls.foldLeft((n, List[A](), List[A]())) {
+      case ((n, l, r), hd) if n <= 0 => (n, l, hd :: r)
+      case ((n, l, r), hd) => (n - 1, hd :: l, r)
+    } match {
+      case (_, l, r) => (reverse(l), reverse(r))
+    }
   }
+
+  def switchConcat[A]: (List[A], List[A]) => List[A] = (l, r) => r ::: l
+
+  def untuple[A, B, C]: (((A, B)) => C) => (A, B) => C = f => (a, b) => f.apply((a, b))
 
   /** P19 (**) Rotate a list N places to the left.
     * Examples: {{{
@@ -327,7 +335,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list rotated N places to the left.
     */
-  def rotate[A]: (Int, List[A]) => List[A] = ???
+  def rotate[A]: (Int, List[A]) => List[A] = untuple(split[A].tupled andThen switchConcat[A].tupled)
 
   /** P20 (*) Remove the Kth element from a list.
     * Return the list and the removed element in a Tuple. Elements are numbered from 0.
@@ -340,7 +348,13 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with nth element removed and the removed element.
     */
-  def removeAt[A]: (Int, List[A]) => (List[A], Option[A]) = ???
+  def removeAt[A]: (Int, List[A]) => (List[A], A) = {
+    case (_, Nil) => throw new ArrayIndexOutOfBoundsException
+    case (n, hd :: tl) if n <= 0 => (tl, hd)
+    case (n, hd :: tl) => removeAt(n - 1, tl) match {
+      case (remaining, el) => (hd :: remaining, el)
+    }
+  }
 
   /** P21 (*) Insert an element at a given position into a list.
     *
@@ -352,7 +366,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with the new element inserted at the nth position
     */
-  def insertAt[A]: (A, Int, List[A]) => List[A] = ???
+  def insertAt[A]: (A, Int, List[A]) => List[A] = {
+    case (el, _, Nil) => el :: Nil
+    case (el, n, ls) if n <= 0 => el :: ls
+    case (el, n, hd :: tl) => hd :: insertAt(el, n - 1, tl)
+  }
 
   /** P22 (*) Create a list containing all integers within a given range.
     *
@@ -363,7 +381,22 @@ object Lists {
     *
     * @return The list of all integers within a given range.
     */
-  def range: (Int, Int) => List[Int] = ???
+  def range: (Int, Int) => List[Int] = {
+    case (n, m) if n > m => Nil
+    case (n, m) => n :: range(n + 1, m)
+  }
+
+  val rand = new Random
+
+  def randomSelectIter[A]: Int => (Int, List[A]) => List[A] = length => (n, ls) => {
+    (length, n, ls) match {
+      case (_, _, Nil) => Nil
+      case (l, m, _ :: _) if m <= 0 => Nil
+      case (l, m, _ :: _) => removeAt(rand.nextInt(l), ls) match {
+        case (remaining, removed) => removed :: randomSelectIter(l - 1)(m - 1, remaining)
+      }
+    }
+  }
 
   /** P23 (**) Extract a given number of randomly selected elements from a list.
     *
@@ -377,7 +410,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return List with n randomly selected elements from the input list.
     */
-  def randomSelect[A]: (Int, List[A]) => List[A] = ???
+  def randomSelect[A]: (Int, List[A]) => List[A] = (n, ls) => randomSelectIter(length(ls))(n, ls)
 
   /** P24 (*) Lotto: Draw N different random numbers from the set 1..M.
     *

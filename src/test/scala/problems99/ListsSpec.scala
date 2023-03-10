@@ -155,5 +155,117 @@ class ListsSpec extends AnyFunSpec{
         assert(Lists.split(2, List('a', 'b', 'b', 'c', 'd')) === (List('a', 'b'), List('b', 'c', 'd')))
       }
     }
+
+    describe("switchConcat") {
+
+      it("should concatenate two lists in reverse order") {
+        assert(Lists.switchConcat(List(1, 2, 3), List(4, 5, 6)) == List(4, 5, 6, 1, 2, 3))
+      }
+
+      it("should return an empty list when both lists are empty") {
+        assert(Lists.switchConcat(List.empty[Int], List.empty[Int]) == List.empty[Int])
+      }
+
+      it("should return the second list when the first list is empty") {
+        assert(Lists.switchConcat(List.empty[Int], List(1, 2, 3)) == List(1, 2, 3))
+      }
+
+      it("should return the first list when the second list is empty") {
+        assert(Lists.switchConcat(List(1, 2, 3), List.empty[Int]) == List(1, 2, 3))
+      }
+    }
+
+    describe("untuple") {
+
+      it("should return a function that takes a tuple as input") {
+        val f = Lists.untuple((t: (Int, String)) => t._2)
+        assert(f(1, "hello") == "hello")
+      }
+
+      it("should return the result of applying the input function to the tuple") {
+        val f = Lists.untuple((t: (Int, String)) => t._2.toUpperCase)
+        assert(f(1, "hello") == "HELLO")
+      }
+    }
+
+    describe("rotate") {
+
+      it("should rotate a list N places to the left") {
+        assert(Lists.rotate(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)) ==
+          List('d, 'e, 'f, 'g, 'h, 'i, 'j, 'k, 'a, 'b, 'c))
+        assert(Lists.rotate(-2, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k)) ==
+          List('j, 'k, 'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i))
+      }
+
+      it("should return an empty list when the input list is empty") {
+        assert(Lists.rotate(3, Nil) == Nil)
+      }
+
+      it("should return the input list when N is zero") {
+        assert(Lists.rotate(0, List(1, 2, 3)) == List(1, 2, 3))
+      }
+    }
+
+    describe("removeAt") {
+
+      it("should remove the Kth element from a list") {
+        assert(Lists.removeAt(1, List('a, 'b, 'c, 'd)) == (List('a, 'c, 'd), 'b))
+      }
+
+      it("should throw an exception when the list is empty") {
+        assertThrows[ArrayIndexOutOfBoundsException] {
+          Lists.removeAt(0, Nil)
+        }
+      }
+
+      it("should throw an exception when K is out of bounds") {
+        assertThrows[ArrayIndexOutOfBoundsException] {
+          Lists.removeAt(4, List('a, 'b, 'c, 'd)) == (List('a, 'b, 'c, 'd), null)
+        }
+      }
+    }
+
+    describe("insertAt") {
+      it("should insert an element at the beginning of the list") {
+        assert(Lists.insertAt('new, 0, List('a, 'b, 'c)) == List('new, 'a, 'b, 'c))
+      }
+      it("should insert an element at the end of the list") {
+        assert(Lists.insertAt('new, 3, List('a, 'b, 'c)) == List('a, 'b, 'c, 'new))
+      }
+      it("should insert an element in the middle of the list") {
+        assert(Lists.insertAt('new, 2, List('a, 'b, 'c)) == List('a, 'b, 'new, 'c))
+      }
+      it("should return the original list if the index is greater than the list length") {
+        assert(Lists.insertAt('new, 5, List('a, 'b, 'c)) == List('a, 'b, 'c, 'new))
+      }
+      it("should return a list with the new element if the index is negative") {
+        assert(Lists.insertAt('new, -1, List('a, 'b, 'c)) == List('new, 'a, 'b, 'c))
+      }
+    }
+
+    describe("range") {
+      it("should return an empty list if the start is greater than the end") {
+        assert(Lists.range(5, 2) == Nil)
+      }
+      it("should return a list with all integers within a given range") {
+        assert(Lists.range(1, 5) == List(1, 2, 3, 4, 5))
+      }
+    }
+
+    describe("randomSelect") {
+      it("should return an empty list if the input list is empty") {
+        assert(Lists.randomSelect(3, Nil) == Nil)
+      }
+      it("should return an empty list if n is less than or equal to 0") {
+        assert(Lists.randomSelect(0, List('a, 'b, 'c)) == Nil)
+        assert(Lists.randomSelect(-1, List('a, 'b, 'c)) == Nil)
+      }
+      it("should return n randomly selected elements from the input list") {
+        val list = List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j)
+        val selected = Lists.randomSelect(5, list)
+        assert(selected.length == 5)
+        assert(selected.toSet.subsetOf(list.toSet))
+      }
+    }
   }
 }
