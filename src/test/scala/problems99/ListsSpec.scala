@@ -170,5 +170,45 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
+    describe("the solution to P16") {
+      it("should return dropped list") {
+        println(Lists.rotate(2, List('a', 'b', 'c', 'd', 'e')))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P17") {
+      it("should return dropped list") {
+        println(Lists.removeAt(2, List('a', 'b', 'c', 'd', 'e')))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P18") {
+      it("should return dropped list") {
+        println(Lists.insertAt('z', 1, List('a', 'b', 'c', 'd', 'e')))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P19") {
+      it("should return dropped list") {
+        println(Lists.range(4, 9))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
   }
 }
