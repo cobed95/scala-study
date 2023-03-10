@@ -323,6 +323,20 @@ object Lists {
 
   def untuple[A, B, C]: (((A, B)) => C) => (A, B) => C = f => (a, b) => f.apply((a, b))
 
+  /** P18 (**) Extract a slice from a list.
+    * Given two indices, I and K, the slice is the list containing the elements from and including the
+    * Ith element up to but not including the Kth element of the original list. Start counting the elements with 0.
+    *
+    * Example: {{{
+    *   slice(3, 7, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
+    *   // res0: List[Symbol] = List('d, 'e, 'f, 'g)
+    * }}}
+    *
+    * @tparam A The type of the list's elements
+    * @return The slice of the list.
+    */
+  def slice[A]: (Int, Int, List[A]) => List[A] = ???
+
   /** P19 (**) Rotate a list N places to the left.
     * Examples: {{{
     *   rotate(3, List('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k))
