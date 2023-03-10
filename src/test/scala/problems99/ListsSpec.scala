@@ -150,5 +150,25 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
+    describe("the solution to P14") {
+      it("should return dropped list") {
+        println(Lists.drop(-100, List('a', 'b', 'c', 'd', 'e')))
+//        assert(
+//          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+//            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+//        )
+      }
+    }
+
+    describe("the solution to P15") {
+      it("should return dropped list") {
+        println(Lists.split(2, List('a', 'b', 'c', 'd', 'e')))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
   }
 }

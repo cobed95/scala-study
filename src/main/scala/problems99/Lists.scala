@@ -305,7 +305,7 @@ object Lists {
     */
   def duplicateN[A]: (Int, List[A]) => List[A] = {
     case (_, Nil) => Nil
-    case (n, head :: Nil) => List.fill(n)(head)
+    case (n, l) if n < 1 => l
     case (n, head :: tail) => List.fill(n)(head) ::: duplicateN(n, tail)
   }
 
@@ -319,7 +319,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with every Nth element dropped.
     */
-  def drop[A]: (Int, List[A]) => List[A] = ???
+  def drop[A]: (Int, List[A]) => List[A] = {
+    case (_, Nil) => Nil
+    case (n, l) if n < 0 => drop(n + length(l), l)
+    case (n, _ :: tail) if n == 0 => tail
+    case (n, head :: tail) => head :: drop(n - 1, tail)
+  }
 
   /** (*) Split a list into two parts.
     *
@@ -332,5 +337,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def putLeftHead[A]: (A, (List[A], List[A])) => (List[A], List[A]) = {
+    case (el, (left, right)) => (el :: left, right)
+  }
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = {
+    case (_, Nil) => (Nil, Nil)
+    case (n, l) if n < 0 => split(n + length(l), l)
+    case (n, head :: tail) if n == 0 => (List(head), tail)
+    case (n, head :: tail) => putLeftHead(head, split(n - 1, tail))
+  }
 }
