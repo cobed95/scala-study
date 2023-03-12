@@ -344,4 +344,42 @@ object Lists {
     case (x1, x2) if x1 < x2  => x1 :: range(x1 + 1, x2)
     case _                    => Nil
   }
+
+  def randomSelect[A]: (Int, List[A]) => List[A] = { (x, ls) =>
+    def randomSelect[A]: (Int, List[A], scala.util.Random) => List[A] = {
+      case (x, ls, r) if x > 0 =>
+        removeAt(r.nextInt(x), ls) match {
+          case (ls, y) => y :: Lists.randomSelect(x - 1, ls)
+        }
+      case _ => Nil
+    }
+    randomSelect(x, ls, new scala.util.Random)
+  }
+
+  def lotto[A]: (Int, Int) => List[Int] = { (a, b) =>
+    randomSelect(a, range(1, b))
+  }
+
+  def randomPermute[A]: List[A] => List[A] = { ls =>
+    randomSelect(length(ls), ls)
+  }
+
+  def partition[A]: List[A] => List[(List[A], A)] = { ls =>
+    map[Int, (List[A], A)](range(0, length(ls) - 1), x => removeAt(x, ls))
+  }
+
+  private def multipleAppendFront[A]: (A, List[List[A]]) => List[List[A]] = {
+    (x, ls) =>
+      map[List[A], List[A]](ls, ls => x :: ls)
+  }
+
+  def combinations[A]: (Int, List[A]) => List[List[A]] = {
+    case (x, ls1) if x > 0 =>
+      val ls2 = partition[A](ls1)
+      val ls = map[(List[A], A), List[List[A]]](ls2, {
+        case (ls3, y) => multipleAppendFront(y, combinations(x - 1, ls3))
+      })
+      flatMap[List[List[A]], List[A]](ls, x => x)
+    case _ => List(List())
+  }
 }
