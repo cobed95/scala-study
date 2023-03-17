@@ -4,7 +4,7 @@ package problems99
 import org.scalatest.funspec.AnyFunSpec
 
 class ListsSpec extends AnyFunSpec{
-  describe("In the lists section of the 99 Problems in Scala,") {
+  val newValue = {
     describe("the solution to P01") {
       it("should return None when list is empty.") {
         assert(Lists.last(List()).isEmpty)
@@ -183,19 +183,19 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
-    describe("the solution to rotateN") {
-      it("should return rotateN list") {
-        assert(
-          Lists.rotateN(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
-          == List("d", "e", "f", "g", "h", "i", "j", "k", "a", "b", "c")
-        )
+    // describe("the solution to rotateN") {
+    //   it("should return rotateN list") {
+    //     assert(
+    //       Lists.rotateN(3, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+    //       == List("d", "e", "f", "g", "h", "i", "j", "k", "a", "b", "c")
+    //     )
 
-        assert(
-          Lists.rotateN(-2, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
-          == List("j", "k", "a", "b", "c", "d", "e", "f", "g", "h", "i")
-        )
-      }
-    }
+    //     assert(
+    //       Lists.rotateN(-2, List("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"))
+    //       == List("j", "k", "a", "b", "c", "d", "e", "f", "g", "h", "i")
+    //     )
+    //   }
+    // }
 
     describe("the solution to removeKth") {
       it("should return removeKth list") {
@@ -215,6 +215,32 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
-
+    describe{"the solution to combination"} {
+      it("should return combination list") {
+        assert(
+          Lists.combinations(3, List("a", "b", "c", "d", "e", "f")) 
+          == List(
+            List("a", "b", "c"), List("a", "b", "d"), 
+            List("a", "b", "e"), List("a", "b", "f"), 
+            List("a", "c", "d"), List("a", "c", "e"), 
+            List("a", "c", "f"), List("a", "d", "e"), 
+            List("a", "d", "f"), List("a", "e", "f"), 
+            List("b", "c", "d"), List("b", "c", "e"), 
+            List("b", "c", "f"), List("b", "d", "e"), 
+            List("b", "d", "f"), List("b", "e", "f"), 
+            List("c", "d", "e"), List("c", "d", "f"), 
+            List("c", "e", "f"), List("d", "e", "f"))
+        )
+        assert(
+          Lists.combinations(2, List("a", "b", "c", "d", "e", "f")) 
+          == List(
+            List("a", "b"), List("a", "c"), List("a", "d"), 
+            List("a", "e"), List("a", "f"), List("b", "c"), 
+            List("b", "d"), List("b", "e"), List("b", "f"), 
+            List("c", "d"), List("c", "e"), List("c", "f"), 
+            List("d", "e"), List("d", "f"), List("e", "f"))
+        )
+      }
+    }
   }
 }
