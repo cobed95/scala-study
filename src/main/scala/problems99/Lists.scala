@@ -335,7 +335,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The slice of the list.
     */
-  def slice[A]: (Int, Int, List[A]) => List[A] = ???
+  def slice[A]: (Int, Int, List[A]) => List[A] = {
+    case (_, _, Nil) => Nil
+    case (i, j, _ :: _) if i >= j => Nil
+    case (i, j, _ :: tl) if i > 0 => slice(i - 1, j - 1, tl)
+    case (i, j, hd :: tl) => hd :: slice(i, j - 1, tl)
+  }
 
   /** P19 (**) Rotate a list N places to the left.
     * Examples: {{{
@@ -435,7 +440,10 @@ object Lists {
     *
     * @return List of N random numbers from set 1..M.
     */
-  def lotto: (Int, Int) => List[Int] = ???
+  def lotto: (Int, Int) => List[Int] = (n, m) => randomSelect(n, range(1, m))
+
+//  def applySequentially[A, B, C]: (A, B, A => B, B => C) => C = (a, b, f, g) =>
+//  def lotto2: (Int, Int) => List[Int] = randomSelect.curried
 
   /** P25 (*) Generate a random permutation of the elements of a list.
     * Hint: Use the solution of problem P23.
@@ -448,7 +456,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The random permutation of the input list.
     */
-  def randomPermute[A]: List[A] => List[A] = ???
+  def randomPermute[A]: List[A] => List[A] = ls => randomSelect(length(ls), ls)
+
+  def lengthAndSelf[A]: List[A] => (Int, List[A]) = ls => (length(ls), ls)
+  def randomPermute2[A]: List[A] => List[A] = lengthAndSelf andThen randomSelect.tupled
 
   /** P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list.
     *
@@ -459,7 +470,14 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return All combinations of K distinct objects from input elements
     */
-  def combinations[A]: (Int, List[A]) => List[List[A]] = ???
+  def combinations[A]: (Int, List[A]) => List[List[A]] = {
+    case (n, _) if n <= 0 => Nil
+    case (n, ls) if n == 1 => ls map (List(_))
+    case (_, Nil) => Nil
+    case (n, ls) if n > length(ls) => Nil
+    case (n, ls) if n == length(ls) => List(ls)
+    case (n, hd :: tl) => (combinations(n - 1, tl) map (hd :: _)) ::: combinations(n, tl)
+  }
 
   /** P27 (**) Group the elements of a set into disjoint subsets.
     *

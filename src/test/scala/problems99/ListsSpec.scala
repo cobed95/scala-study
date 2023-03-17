@@ -2,8 +2,9 @@ package org.laplacetec.study
 package problems99
 
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 
-class ListsSpec extends AnyFunSpec{
+class ListsSpec extends AnyFunSpec with Matchers {
   describe("In the lists section of the 99 Problems in Scala,") {
     describe("the solution to P01") {
       it("should return None when list is empty.") {
@@ -156,6 +157,48 @@ class ListsSpec extends AnyFunSpec{
       }
     }
 
+    describe("slice") {
+      it("should return an empty list if the input list is empty") {
+        val actual = Lists.slice(0, 1, Nil)
+        val expected = Nil
+        assert(actual == expected)
+      }
+
+      it("should return an empty list if the start index is greater than or equal to the end index") {
+        val actual1 = Lists.slice(1, 1, List(1, 2, 3))
+        val expected1 = Nil
+        assert(actual1 == expected1)
+
+        val actual2 = Lists.slice(3, 1, List(1, 2, 3))
+        val expected2 = Nil
+        assert(actual2 == expected2)
+      }
+
+      it("should return a slice of the list starting from the start index up to but not including the end index") {
+        val actual = Lists.slice(2, 5, List(1, 2, 3, 4, 5, 6, 7))
+        val expected = List(3, 4, 5)
+        assert(actual == expected)
+      }
+
+      it("should return the entire list if the start index is 0 and the end index is the length of the list") {
+        val actual = Lists.slice(0, 4, List(1, 2, 3, 4))
+        val expected = List(1, 2, 3, 4)
+        assert(actual == expected)
+      }
+
+      it("should return a slice starting from the start index if the end index is greater than the length of the list") {
+        val actual = Lists.slice(2, 10, List(1, 2, 3, 4))
+        val expected = List(3, 4)
+        assert(actual == expected)
+      }
+
+      it("should return a slice up to but not including the end index if the end index is equal to the length of the list") {
+        val actual = Lists.slice(0, 3, List(1, 2, 3, 4))
+        val expected = List(1, 2, 3)
+        assert(actual == expected)
+      }
+    }
+
     describe("switchConcat") {
 
       it("should concatenate two lists in reverse order") {
@@ -265,6 +308,84 @@ class ListsSpec extends AnyFunSpec{
         val selected = Lists.randomSelect(5, list)
         assert(selected.length == 5)
         assert(selected.toSet.subsetOf(list.toSet))
+      }
+    }
+
+    describe("lotto") {
+      it("should return an empty list if n is zero") {
+        Lists.lotto(0, 10) shouldBe Nil
+      }
+
+      it("should return a list of length n") {
+        val n = 5
+        val result = Lists.lotto(n, 10)
+        result.length shouldBe n
+      }
+
+      it("should return a list of distinct integers") {
+        val result = Lists.lotto(10, 20)
+        result.distinct.length shouldBe result.length
+      }
+
+      it("should return a list of integers between 1 and m (inclusive)") {
+        val m = 10
+        val result = Lists.lotto(5, m)
+        result.forall(n => n >= 1 && n <= m) shouldBe true
+      }
+    }
+
+    describe("randomPermute") {
+      it("should return an empty list if the input list is empty") {
+        val result = Lists.randomPermute(List.empty[Int])
+        result shouldBe Nil
+      }
+
+      it("should return a list of the same length as the input list") {
+        val input = List(1, 2, 3, 4, 5)
+        val result = Lists.randomPermute(input)
+        result.length shouldBe input.length
+      }
+
+      it("should return a list with the same elements as the input list") {
+        val input = List(1, 2, 3, 4, 5)
+        val result = Lists.randomPermute(input)
+        result.toSet shouldBe input.toSet
+      }
+
+      it("should return a different permutation each time it is called") {
+        val input = List(1, 2, 3, 4, 5)
+        val result1 = Lists.randomPermute(input)
+        val result2 = Lists.randomPermute(input)
+        result1 should not be result2
+      }
+    }
+
+    describe("combinations") {
+      it("should return an empty list if n is zero") {
+        Lists.combinations(0, List(1, 2, 3)) shouldBe Nil
+      }
+
+      it("should return an empty list if n is greater than the length of the input list") {
+        Lists.combinations(4, List(1, 2, 3)) shouldBe Nil
+      }
+
+      it("should return a list with one element if n is 1") {
+        val input = List(1, 2, 3, 4, 5)
+        val result = Lists.combinations(1, input)
+        result.length shouldBe input.length
+        result.foreach(sublist => sublist.length shouldBe 1)
+      }
+
+      it("should return all combinations of k elements from the input list") {
+        val input = List(1, 2, 3)
+        val result = Lists.combinations(2, input)
+        result should contain theSameElementsAs List(List(1, 2), List(1, 3), List(2, 3))
+      }
+
+      it("should return all combinations in lexicographic order") {
+        val input = List(1, 2, 3)
+        val result = Lists.combinations(2, input)
+        result shouldBe List(List(1, 2), List(1, 3), List(2, 3))
       }
     }
   }
