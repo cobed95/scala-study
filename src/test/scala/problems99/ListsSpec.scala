@@ -224,5 +224,53 @@ class ListsSpec extends AnyFunSpec {
         assert(Lists.range(2, 5) == List(2, 3, 4, 5))
       }
     }
+
+    describe("the solution to P28 a)") {
+      it("should return lists sorted by length") {
+        assert(
+          Lists.lsort(
+            List(
+              List(1, 2),
+              List(3),
+              List(4, 5, 6),
+              List(7),
+              List(8, 9),
+              List(10)
+            )
+          ) == List(
+            List(3),
+            List(7),
+            List(10),
+            List(1, 2),
+            List(8, 9),
+            List(4, 5, 6)
+          )
+        )
+      }
+    }
+
+    describe("the solution to P28 b)") {
+      it("should return lists sorted by frequency of length") {
+        assert(
+          Lists.lsortFreq(
+            List(
+              List(1, 2),
+              List(3),
+              List(4, 5, 6),
+              List(7),
+              List(8, 9),
+              List(10)
+            )
+          ) == List(
+            List(4, 5, 6),
+            List(1, 2),
+            List(8, 9),
+            List(3),
+            List(7),
+            List(10)
+          )
+        )
+      }
+    }
   }
 }

@@ -382,4 +382,17 @@ object Lists {
       flatMap[List[List[A]], List[A]](ls, x => x)
     case _ => List(List())
   }
+
+  def lsort[A]: List[List[A]] => List[List[A]] = { ls =>
+    ls.sortWith((ls1, ls2) => length(ls1) < length(ls2))
+  }
+
+  def lsortFreq[A]: List[List[A]] => List[List[A]] = { ls =>
+    val frequenciesOfLengths =
+      encode(ls.map(length).sortWith(_ < _)).map(_.swap).toMap
+    ls.sortWith(
+      (ls1, ls2) =>
+        frequenciesOfLengths(length(ls1)) < frequenciesOfLengths(length(ls2))
+    )
+  }
 }
