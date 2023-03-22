@@ -364,23 +364,26 @@ object Lists {
     randomSelect(length(ls), ls)
   }
 
-  def partition[A]: List[A] => List[(List[A], A)] = { ls =>
-    map[Int, (List[A], A)](range(0, length(ls) - 1), x => removeAt(x, ls))
-  }
-
-  private def multipleAppendFront[A]: (A, List[List[A]]) => List[List[A]] = {
-    (x, ls) =>
-      map[List[A], List[A]](ls, ls => x :: ls)
-  }
-
   def combinations[A]: (Int, List[A]) => List[List[A]] = {
-    case (x, ls1) if x > 0 =>
-      val ls2 = partition[A](ls1)
-      val ls = map[(List[A], A), List[List[A]]](ls2, {
-        case (ls3, y) => multipleAppendFront(y, combinations(x - 1, ls3))
+    case (x, _) if x < 1            => Nil
+    case (_, Nil)                   => Nil
+    case (1, ls)                    => map[A, List[A]](ls, List(_))
+    case (x, ls) if x == length(ls) => List(ls)
+    case (x, ls) if x > length(ls)  => Nil
+    case (x, y :: ls) =>
+      map[List[A], List[A]](combinations(x - 1, ls), y :: _) ::: combinations(
+        x,
+        ls
+      )
+  }
+
+  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = {
+    case (Nil, _) => List(Nil)
+    case (_, Nil) => List(Nil)
+    case (x :: ls1, ls2) =>
+      combinations(x, ls2).flatMap({ z =>
+        map[List[List[A]], List[List[A]]](group(ls1, ls2 diff z), z :: _)
       })
-      flatMap[List[List[A]], List[A]](ls, x => x)
-    case _ => List(List())
   }
 
   def lsort[A]: List[List[A]] => List[List[A]] = { ls =>
