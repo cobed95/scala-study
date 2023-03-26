@@ -382,7 +382,7 @@ object Lists {
   def rotate[A]: (Int, List[A]) => List[A] = {
     case (_, Nil) => Nil
     case (n, l) if n == 0 => l
-    case (n, l) if n < 1 => rotate(n + length(l), l)
+    case (n, l) if n < 0 => rotate(n + length(l), l)
     case (n, head :: tail) => rotateIter(n-1, tail, List(head))
   }
 
@@ -397,10 +397,9 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with nth element removed and the removed element.
     */
-  def removeAt[A]: (Int, List[A]) => (List[A], Option[A]) = {
-    case (_, Nil) => (Nil, None)
+  def removeAt[A]: (Int, List[A]) => (List[A], A) = {
     case (n, l) if n < 0 => removeAt(n + length(l), l)
-    case (n, head :: tail) if n == 0 => (tail, Some(head))
+    case (n, head :: tail) if n == 0 => (tail, head)
     case (n, head :: tail) => removeAt(n - 1, tail) match {
       case (l, el) => (head :: l, el)
     }
@@ -453,7 +452,18 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return List with n randomly selected elements from the input list.
     */
-  def randomSelect[A]: (Int, List[A]) => List[A] = ???
+  val RANDOM = new scala.util.Random
+//  def randRange: (Int, Int) => Int = {
+//    case (start, stop) => range(start, stop)
+//  }
+
+  def randomSelect[A]: (Int, List[A]) => List[A] = {
+    case (_, Nil) => Nil
+    case (n, _) if n == 0 => Nil
+    case (n, l) => removeAt(RANDOM.nextInt(length(l)), l) match {
+      case (resultList, removed) => removed :: randomSelect(n - 1, resultList)
+    }
+  }
 
   /** P24 (*) Lotto: Draw N different random numbers from the set 1..M.
     *
@@ -464,7 +474,9 @@ object Lists {
     *
     * @return List of N random numbers from set 1..M.
     */
-  def lotto: (Int, Int) => List[Int] = ???
+  def lotto: (Int, Int) => List[Int] = {
+    case (cnt, size) => randomSelect(cnt, range(1, size + 1))
+  }
 
   /** P25 (*) Generate a random permutation of the elements of a list.
     * Hint: Use the solution of problem P23.
@@ -477,7 +489,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The random permutation of the input list.
     */
-  def randomPermute[A]: List[A] => List[A] = ???
+  def randomPermute[A]: List[A] => List[A] = (l => randomSelect(length(l), l))
 
   /** P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list.
     *
@@ -488,7 +500,14 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return All combinations of K distinct objects from input elements
     */
-  def combinations[A]: (Int, List[A]) => List[List[A]] = ???
+//  combination([0,1,2,3], 2) = ([0],combination([1,2,3], 1)) + ([1],combination([2,3], 1)) + ([2],combination([3], 1)))
+
+  def combinations[A]: (Int, List[A]) => List[List[A]] = {
+    case (_, Nil) => Nil
+    case (n, l) if n > length(l) => Nil
+    case (n, l) if n == length(l) => List(l)
+    case (n, head :: tail) => combinations(n - 1, tail).map(head :: _) ::: combinations(n, tail)
+  }
 
   /** P27 (**) Group the elements of a set into disjoint subsets.
     *
@@ -512,10 +531,19 @@ object Lists {
     *
     * You may find more about this combinatorial problem in a good book on discrete mathematics under the term “multinomial coefficients”.
     *
+    * ((Carla, David),), ((Aldo, Beat), …)
     * @tparam A The type of the elements of the list to be grouped.
     * @return The list of all possible groups.
     */
-  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = ???
+//    def diff[A]: (List[A], List[A]) => List[A] = (x, y) => (x.diff(y))
+
+  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = {
+    case (Nil, _) => List(Nil)
+    case (_, Nil) => List(Nil)
+    case (head :: tail, members) => combinations(head, members).flatMap(
+      picked => group(tail, members.diff(picked)).map(picked :: _)
+    )
+  }
 
   /** P28 (**) Sorting a list of lists according to length of sublists.
     *
@@ -540,7 +568,7 @@ object Lists {
     * @tparam A The type of the elements of the list.
     * @return The sorted list.
     */
-  def lsort[A]: List[List[A]] => List[List[A]] = ???
+  def lsort[A]: List[List[A]] => List[List[A]] = l => l.sortBy(x => length(x))
 
   /** P28 (**) Sorting a list of lists according to length of sublists.
     *
@@ -565,5 +593,13 @@ object Lists {
     * @tparam A The type of the elements of the list.
     * @return The sorted list.
     */
-  def lsortFreq[A]: List[List[A]] => List[List[A]] = ???
+  import scala.collection.mutable.Map
+  def lsortFreq[A]: List[List[A]] => List[List[A]] = l => {
+    val freqMap = Map[Int,Int]()
+    l.foreach(x => {
+      val len = length(x)
+      freqMap(len) = freqMap.getOrElse(len, 0) + 1
+    })
+    l.sortBy(x => freqMap.get(length(x)))
+  }
 }

@@ -152,7 +152,7 @@ class ListsSpec extends AnyFunSpec{
 
     describe("the solution to P14") {
       it("should return dropped list") {
-        println(Lists.drop(-100, List('a', 'b', 'c', 'd', 'e')))
+        println(Lists.drop(-100, List('a', 'b', 'c', 'd', 'e', 'f')))
 //        assert(
 //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
 //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
@@ -162,7 +162,7 @@ class ListsSpec extends AnyFunSpec{
 
     describe("the solution to P15") {
       it("should return dropped list") {
-        println(Lists.split(2, List('a', 'b', 'c', 'd', 'e')))
+        println(Lists.split(2, List('a', 'b', 'c', 'd', 'e', 'f')))
         //        assert(
         //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
         //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
@@ -173,6 +173,7 @@ class ListsSpec extends AnyFunSpec{
     describe("the solution to P16") {
       it("should return dropped list") {
         println(Lists.rotate(2, List('a', 'b', 'c', 'd', 'e')))
+        println(Lists.rotate(-2, List('a', 'b', 'c', 'd', 'e')))
         //        assert(
         //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
         //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
@@ -209,6 +210,57 @@ class ListsSpec extends AnyFunSpec{
         //        )
       }
     }
+    var testList = List('a', 'b', 'c', 'd', 'e')
+
+    describe("the solution to P20") {
+      it("should return dropped list") {
+        println(Lists.randomSelect(3, testList))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P21") {
+      it("should return dropped list") {
+        println(Lists.combinations(5, testList))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P27") {
+      it("should return dropped list") {
+        println(Lists.group(List(2,2,1), testList))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+    describe("the solution to P28") {
+      val testList28 = List(List('a', 'b', 'c'), List('d', 'e'), List('f', 'g', 'h'), List('d', 'e'), List('i', 'j', 'k', 'l'), List('m', 'n'), List('o'))
+      it("test lsort") {
+        println(Lists.lsort(testList28))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+      it("test lsortFreq") {
+        println(Lists.lsortFreq(testList28))
+        //        assert(
+        //          Lists.drop(List('a', 'a', 'a', 'a', 'b', 'c', 'c', 'a', 'a', 'd', 'e', 'e', 'e', 'e'))
+        //            == List((4,'a'), (1,'b'), (2,'c'), (2,'a'), (1,'d'), (4,'e'))
+        //        )
+      }
+    }
+
+
 
   }
 }
