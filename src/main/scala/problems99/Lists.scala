@@ -593,13 +593,16 @@ object Lists {
     * @tparam A The type of the elements of the list.
     * @return The sorted list.
     */
-  import scala.collection.mutable.Map
+
+
+  import scala.collection.immutable.Map
   def lsortFreq[A]: List[List[A]] => List[List[A]] = l => {
-    val freqMap = Map[Int,Int]()
-    l.foreach(x => {
-      val len = length(x)
-      freqMap(len) = freqMap.getOrElse(len, 0) + 1
-    })
+    val freqMap = l.foldLeft(Map[Int,Int]())(
+      (map, curr) => {
+        val len = length(curr)
+        map.updated(len, map.getOrElse(len, 0) + 1)
+      }
+    )
     l.sortBy(x => freqMap.get(length(x)))
   }
 }
