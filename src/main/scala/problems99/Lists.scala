@@ -443,7 +443,7 @@ object Lists {
   def lotto: (Int, Int) => List[Int] = (n, m) => randomSelect(n, range(1, m))
 
 //  def applySequentially[A, B, C]: (A, B, A => B, B => C) => C = (a, b, f, g) =>
-//  def lotto2: (Int, Int) => List[Int] = randomSelect.curried
+//  def lotto2: (Int, Int) => List[Int] = range.curried(1) andThen randomSelect
 
   /** P25 (*) Generate a random permutation of the elements of a list.
     * Hint: Use the solution of problem P23.
@@ -458,7 +458,9 @@ object Lists {
     */
   def randomPermute[A]: List[A] => List[A] = ls => randomSelect(length(ls), ls)
 
-  def lengthAndSelf[A]: List[A] => (Int, List[A]) = ls => (length(ls), ls)
+  def identity[A]: A => A = x => x
+  def apply2[A, B, C]: (A => B) => (A => C) => A => (B, C) = f => g => a => (f(a), g(a))
+  def lengthAndSelf[A]: List[A] => (Int, List[A]) = apply2(length[A])(identity[List[A]])
   def randomPermute2[A]: List[A] => List[A] = lengthAndSelf andThen randomSelect.tupled
 
   /** P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list.
@@ -474,9 +476,15 @@ object Lists {
     case (n, _) if n <= 0 => Nil
     case (n, ls) if n == 1 => ls map (List(_))
     case (_, Nil) => Nil
-    case (n, ls) if n > length(ls) => Nil
-    case (n, ls) if n == length(ls) => List(ls)
     case (n, hd :: tl) => (combinations(n - 1, tl) map (hd :: _)) ::: combinations(n, tl)
+  }
+
+  implicit class Crossable[X](xs: Iterable[X]) {
+    def cross[Y](ys: Iterable[Y]) = for { x <- xs; y <- ys } yield (x, y)
+  }
+
+  implicit class Listifyable[X](xs: Iterable[(X, X)]) {
+    def listify = xs map { case (x, y) => List(x, y) }
   }
 
   /** P27 (**) Group the elements of a set into disjoint subsets.
@@ -504,7 +512,11 @@ object Lists {
     * @tparam A The type of the elements of the list to be grouped.
     * @return The list of all possible groups.
     */
-  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = ???
+  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = {
+    case (groupSizes, toGroup) if groupSizes.sum != length(toGroup) => Nil
+    case (Nil, toGroup) => Nil
+    case (hd :: tl, toGroup) => combinations(hd, toGroup) map (List[List[A]](_))
+  }
 
   /** P28 (**) Sorting a list of lists according to length of sublists.
     *
