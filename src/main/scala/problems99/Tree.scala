@@ -7,8 +7,8 @@ import scala.math.Ordering.Implicits.infixOrderingOps
   * which are binary trees themselves. We shall use the following classes to represent binary trees.
   * (Also available in tree1.scala.) An End is equivalent to an empty tree. A Branch has a value,
   * and two descendant trees. The toString functions are relatively arbitrary, but they yield
-  * a more compact output than Scala’s default. Putting a plus in front of the T makes the class covariant;
-  * it will be able to hold subtypes of whatever type it’s created for.
+  * a more compact output than Scala's default. Putting a plus in front of the T makes the class covariant;
+  * it will be able to hold subtypes of whatever type it's created for.
   * (This is important so that End can be a singleton object; as a singleton, it must have a specific type,
   * so we give it type Nothing, which is a subtype of every other type.)
   *
@@ -128,32 +128,96 @@ sealed abstract class Tree[+T] {
 
   /** P58 (**) Generate-and-test paradigm.
     *
+    * Apply the generate-and-test paradigm to construct all symmetric,
+    * completely balanced binary trees with a given number of nodes.
+    *
     * @param n The number of nodes in the tree.
     * @param v The value to use for each node in the tree.
-    * @tparam T The type of the value stored in the tree.
+    * @tparam U The type of the value stored in the tree.
     * @return A list of all symmetric and completely balanced binary trees with n nodes.
     */
-  def symmetricBalancedTrees2[T](n: Int, v: T): List[Tree[T]] = ???
+  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = ???
 
   /** P59 (**) Construct height-balanced binary trees.
     *
+    * In a height-balanced binary tree, the following property holds for every node:
+    * The height of its left subtree and the height of its right subtree are almost equal,
+    * which means their difference is not greater than one.
+    *
+    * Write a method Tree.hbalTrees to construct height-balanced binary trees
+    * for a given height with a supplied value for the nodes.
+    * The function should generate all solutions.
+    *
+    * Example: {{{
+    *   Tree.hbalTrees(3, "x")
+    *   // res0: List[Node[String]] = List(T(x T(x T(x . .) T(x . .)) T(x T(x . .) T(x . .))), T(x T(x T(x . .) T(x . .)) T(x T(x . .) .)), ... 
+    * }}}
+    *
     * @param height The desired height of the tree.
     * @param value  The value to use for each node in the tree.
-    * @tparam T The type of the value stored in the tree.
+    * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with the given height.
     */
-  def hbalTrees[T](height: Int, value: T): List[Tree[T]] = ???
+  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = ???
 
   /** P60 (**) Construct height-balanced binary trees with a given number of nodes.
     *
+    * Consider a height-balanced binary tree of height H. What is the maximum number of nodes it can contain?
+    * Clearly, N_max = 2&#94;H - 1. However, what is the minimum number N_min? This question is more difficult.
+    * Try to find a recursive statement and turn it into a function minHbalNodes that takes a height and returns N_min.
+    *
+    * {{{
+    *   minHbalNodes(3)
+    *   // res0: Int = 4
+    * }}}
+    *
+    * On the other hand, we might ask:
+    * what is the maximum height H a height-balanced binary tree with N nodes can have?
+    * Write a maxHbalHeight function.
+    *
+    * {{{
+    *   maxHbalHeight(4)
+    *   // res1: Int = 3
+    * }}}
+    *
+    * Now, we can attack the main problem: construct all the height-balanced binary trees with a given number of nodes.
+    *
+    * {{{
+    *   Tree.hbalTreesWithNodes(4, "x")
+    *   // res2: List[Node[String]] = List(T(x T(x T(x . .) .) T(x . .)), T(x T(x . T(x . .)) T(x . .)), ...
+    * }}}
+    *
+    * Find out how many height-balanced trees exist for N = 15.
+    *
+    * @param h The height of the tree.
+    * @return The minimum number of nodes N_min for a height-balanced tree.
+    */
+  def minHbalNodes(h: Int): Int = ???
+
+  /** Maximum height of a height-balanced tree for a given number of nodes
+    *
+    * @param n The number of nodes.
+    * @return The maximum height H of height-balanced trees.
+    */
+  def maxHbalHeight(n: Int): Int = ???
+
+  /** All height balanced trees given the number of nodes.
+    *
     * @param n The number of nodes in the tree.
     * @param v The value to use for each node in the tree.
-    * @tparam T The type of the value stored in the tree.
+    * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with n nodes.
     */
-  def hbalTreesWithNodes[T](n: Int, v: T): List[Tree[T]] = ???
+  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = ???
 
   /** P61 (*) Count the leaves of a binary tree.
+    *
+    * A leaf is a node with no successors. Write a method leafCount to count them.
+    *
+    * {{{
+    *   Node('x', Node('x'), End).leafCount
+    *   // res0: Int = 1
+    * }}}
     *
     * @return The number of leaves in the tree.
     */
@@ -161,27 +225,44 @@ sealed abstract class Tree[+T] {
 
   /** P61A (*) Collect the leaves of a binary tree in a list.
     *
+    * A leaf is a node with no successors. Write a method leafList to collect them in a list.
+    *
+    * {{{
+    *   Node('a', Node('b'), Node('c', Node('d'), Node('e'))).leafList
+    *   // res0: List[Char] = List(b, d, e)
+    * }}}
+    *
     * @return A list of all leaves in the tree.
     */
-  def leafList: List[T] = ???
+  def leafList[U >: T]: List[U] = ???
 
   /** P62 (*) Collect the internal nodes of a binary tree in a list.
     *
     * An internal node of a binary tree has either one or two non-empty successors. Write a method internalList to
     * collect them in a list.
     *
+    * {{{
+    *   Node('a', Node('b'), Node('c', Node('d'), Node('e'))).internalList
+    *   // res0: List[Char] = List(a, c)
+    * }}}
+    *
     * @return A list of all internal nodes in the tree.
     */
-  def internalList: List[T] = ???
+  def internalList[U >: T]: List[U] = ???
 
   /** P62B (*) Collect the nodes at a given level in a list.
     * A node of a binary tree is at level N if the path from the root to the node has length N−1.
     * The root node is at level 1. Write a method atLevel to collect all nodes at a given level in a list.
     *
+    * {{{
+    *   Node('a', Node('b'), Node('c', Node('d'), Node('e'))).atLevel(2)
+    *   // res0: List[Char] = List(b, c)
+    * }}}
+    *
     * @param n The level of at which to collect the elements.
     * @return List of elements at level N.
     */
-  def atLevel(n: Int): List[T] = ???
+  def atLevel[U >: T](n: Int): List[U] = ???
 }
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
