@@ -263,10 +263,122 @@ sealed abstract class Tree[+T] {
     * @return List of elements at level N.
     */
   def atLevel[U >: T](n: Int): List[U] = ???
+
+
+  /** P63 (**) Construct a complete binary tree.
+    *
+    * A complete binary tree with height H is defined as follows:
+    * The levels 1,2,3,…,H−1 contain the maximum number of nodes (i.e 2&#94;i−1 at the level i,
+    * note that we start counting the levels from 1 at the root).
+    * In level H, which may contain less than the maximum possible number of nodes,
+    * all the nodes are “left-adjusted”. This means that in a levelorder tree traversal all internal nodes come first,
+    * the leaves come second, and empty successors (the Ends which are not really nodes!) come last.
+    *
+    * Particularly, complete binary trees are used as data structures (or addressing schemes) for heaps.
+    *
+    * We can assign an address number to each node in a complete binary tree by enumerating the nodes in levelorder,
+    * starting at the root with number 1. In doing so, we realize that for every node X with address A
+    * the following property holds: The address of X’s left and right successors are 2 * A and 2 * A + 1, respectively,
+    * supposed the successors do exist.
+    * This fact can be used to elegantly construct a complete binary tree structure.
+    * Write a method completeBinaryTree that takes as parameters the number of nodes and the value to put in each node.
+    *
+    * {{{
+    *   Tree.completeBinaryTree(6, "x")
+    *   // res0: Node[String] = T(x T(x T(x . .) T(x . .)) T(x T(x . .) .))
+    * }}}
+    *
+    * @param n The number of nodes
+    * @param v The value to put inside each node
+    * @tparam U The type of the value in each node
+    * @return The complete binary tree with n nodes.
+    */
+  def completeBinaryTree[U >: T](n: Int, v: U): Tree[U] = ???
 }
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
   override def toString: String = "T(" + value.toString + " " + left.toString + " " + right.toString + ")"
+
+  /** P64 (**) Layout a binary tree (1).
+    *
+    * As a preparation for drawing a tree, a layout algorithm is required to determine the position of each node
+    * in a rectangular grid. Several layout methods are conceivable,
+    * one of them is shown in the illustration on the right.
+    *
+    * (See [[https://aperiodic.net/phil/scala/s-99/#p64 P64 problem spec]] for image.)
+    *
+    * In this layout strategy, the position of a node v is obtained by the following two rules:
+    * 1. x_v is equal to the position of the node v in the inorder sequence
+    * 2. y_v is equal to the depth of the node v in the tree
+    *
+    * In order to store the position of the nodes, we add a new class with the additional information.
+    *
+    * {{{
+    *   case class PositionedNode[+T](override val value: T, override val left: Tree[T], override val right: Tree[T], x: Int, y: Int) extends Node[T](value, left, right) {
+    *     override def toString = "T[" + x.toString + "," + y.toString + "](" + value.toString + " " + left.toString + " " + right.toString + ")"
+    *   }
+    * }}}
+    *
+    * Write a method {{{ layoutBinaryTree }}} that turns a tree of normal Nodes into a tree of {{{ PositionedNodes }}}.
+    *
+    * {{{
+    *   Node('a', Node('b', End, Node('c')), Node('d')).layoutBinaryTree
+    *   // res0: PositionedNode[Char] = T[3,1](a T[1,2](b . T[2,3](c . .)) T[4,2](d . .))
+    * }}}
+    *
+    * The tree at right may be constructed with {{{ Tree.fromList(List('n', 'k', 'm', 'c', 'a', 'h', 'g', 'e', 'u', 'p', 's', 'q')) }}}.
+    * Use it to check your code.
+    *
+    * @tparam U The type of the trees contents.
+    * @return Tree of PositionedNodes with x_v and y_v
+    */
+  def layoutBinaryTree[U >: T]: PositionedNode[U] = ???
+
+  /** P65 (**) Layout a binary tree (2).
+    *
+    * An alternative layout method is depicted in the illustration opposite.
+    * Find out the rules and write the corresponding method.
+    * Hint: On a given level, the horizontal distance between neighboring nodes is constant.
+    *
+    * (See [[https://aperiodic.net/phil/scala/s-99/#p65 P65 problem spec]] for image.)
+    *
+    * Use the same conventions as in problem P64.
+    *
+    * {{{
+    *   Node('a', Node('b', End, Node('c')), Node('d')).layoutBinaryTree2
+    *   // res0: PositionedNode[Char] = T[3,1]('a T[1,2]('b . T[2,3]('c . .)) T[5,2]('d . .))
+    * }}}
+    *
+    * The tree at right may be constructed with {{{ Tree.fromList(List('n', 'k', 'm', 'c', 'a', 'e', 'd', 'g', 'u', 'p', 'q')) }}}.
+    * Use it to check your code.
+    *
+    * @tparam U The type of the trees contents.
+    * @return Tree of PositionedNodes with x_v and y_v
+    */
+  def layoutBinaryTree2[U >: T]: PositionedNode[U] = ???
+
+  /** P66 (***) Layout a binary tree (3).
+    *
+    * Yet another layout strategy is shown in the illustration opposite.
+    * The method yields a very compact layout while maintaining a certain symmetry in every node.
+    * Find out the rules and write the corresponding method.
+    * Hint: Consider the horizontal distance between a node and its successor nodes.
+    * How tight can you pack together two subtrees to construct the combined binary tree?
+    *
+    * (See [[https://aperiodic.net/phil/scala/s-99/#p66 P66 problem spec]] for image.)
+    *
+    * Use the same conventions as in problem P64 and P65.
+    * Note: This is a difficult problem. Don’t give up too early!
+    *
+    * {{{
+    *   Node('a', Node('b', End, Node('c')), Node('d')).layoutBinaryTree3
+    *   // res0: PositionedNode[Char] = T[2,1]('a T[1,2]('b . T[2,3]('c . .)) T[3,2]('d . .))
+    * }}}
+    *
+    * @tparam U The type of the trees contents.
+    * @return Tree of PositionedNodes with x_v and y_v
+    */
+  def layoutBinaryTree3[U >: T]: PositionedNode[U] = ???
 }
 object Node {
   def apply[T](value: T): Node[T] = Node(value, End, End)
@@ -274,4 +386,8 @@ object Node {
 
 case object End extends Tree[Nothing] {
   override def toString: String = "."
+}
+
+case class PositionedNode[+T](override val value: T, override val left: Tree[T], override val right: Tree[T], x: Int, y: Int) extends Node[T](value, left, right) {
+  override def toString = "T[" + x.toString + "," + y.toString + "](" + value.toString + " " + left.toString + " " + right.toString + ")"
 }
