@@ -35,7 +35,18 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all completely balanced binary trees with n nodes.
     */
-  def cBalanced[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def cBalanced[U >: T](n: Int, v: U): List[Tree[U]] = (n, v) match {
+    case (n, v) if n < 1 => List(End)
+    case (n, v) if n % 2 == 1 => {
+      val subtrees = cBalanced(n / 2, v)
+      subtrees.flatMap(l => subtrees.map(r => Node(v, l, r)))
+    }
+    case (n, v) => {
+      val smaller = cBalanced(n / 2, v)
+      val bigger = cBalanced(n / 2 - 1 , v)
+      smaller.flatMap(l => bigger.flatMap(r => List(Node(v, l, r), Node(v, r, l))))
+    }
+  }
 
   /** P56 (**) Symmetric binary trees.
     *
@@ -47,7 +58,16 @@ sealed abstract class Tree[+T] {
     *
     * @return A list of all symmetric binary trees with a given number of nodes.
     */
-  def isSymmetric: Boolean = ???
+  def isSymmetric: Boolean = this match {
+    case Node(v, l, r) => l.isMirrorOf(r)
+    case End => true
+  }
+
+  def isMirrorOf[U >: T](right: Tree[U]): Boolean = (this, right) match {
+    case (End, End) => true
+    case (End, Node(_,_,_)) => false
+    case (Node(_,_,_), End) => false
+  }
 
   /** P57 (**) Binary search trees (dictionaries).
     *
@@ -100,8 +120,8 @@ sealed abstract class Tree[+T] {
     * @param v The value to use for each node in the tree.
     * @tparam U The type of the value stored in the tree.
     * @return A list of all symmetric and completely balanced binary trees with n nodes.
-    */
-  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = ???
+    */ 1
+  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = cBalanced(n, v).filter(_.isSymmetric)
 
   /** P59 (**) Construct height-balanced binary trees.
     *
@@ -123,7 +143,19 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with the given height.
     */
-  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = ???
+  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = (height, value) match {
+      case (h, v) if h < 1 => List(End)
+      case (h, v) => {
+        val largeTrees = hbalTrees(h - 1, v)
+        val smallTrees = hbalTrees(h - 2, v)
+
+        largeTrees.flatMap(
+          l => smallTrees.flatMap(
+            s => List(Node(v, l, s), Node(v, s, l), Node(v, l, l))
+          )
+        )
+      }
+  }
 
   /** P60 (**) Construct height-balanced binary trees with a given number of nodes.
     *
@@ -185,7 +217,7 @@ sealed abstract class Tree[+T] {
     * }}}
     *
     * @return The number of leaves in the tree.
-    */
+    */ 2
   def leafCount: Int = ???
 
   /** P61A (*) Collect the leaves of a binary tree in a list.
