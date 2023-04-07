@@ -144,7 +144,8 @@ sealed abstract class Tree[+T] {
     * @return A list of all height-balanced binary trees with the given height.
     */
   def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = (height, value) match {
-      case (h, v) if h < 1 => List(End)
+      case (h, v) if h <= 0 => List(End)
+      case (h, v) if h == 1 => List(Node(v, End, End))
       case (h, v) => {
         val largeTrees = hbalTrees(h - 1, v)
         val smallTrees = hbalTrees(h - 2, v)
@@ -169,7 +170,7 @@ sealed abstract class Tree[+T] {
     * }}}
     *
     * On the other hand, we might ask:
-    * what is the maximum height H a height-balanced binary tree with N nodes can have?
+    * hwat is the maximum height H a height-balanced binary tree with N nodes can have?
     * Write a maxHbalHeight function.
     *
     * {{{
@@ -189,14 +190,24 @@ sealed abstract class Tree[+T] {
     * @param h The height of the tree.
     * @return The minimum number of nodes N_min for a height-balanced tree.
     */
-  def minHbalNodes(h: Int): Int = ???
+  def minHbalNodes(h: Int): Int = h match {
+    case h if h <= 0 => 0 
+    case h if h == 1 => 1 
+    case h => 1 + minHbalNodes(h - 1) + minHbalNodes(h - 2)
+  }
 
   /** Maximum height of a height-balanced tree for a given number of nodes
     *
     * @param n The number of nodes.
     * @return The maximum height H of height-balanced trees.
     */
-  def maxHbalHeight(n: Int): Int = ???
+  def maxHbalHeight(n: Int): Int = {
+    def helper(height: Int): Int = {
+      if (n < minHbalNodes(height)) height - 1
+      else helper(height + 1)
+    }
+    helper(0)
+  }
 
   /** All height balanced trees given the number of nodes.
     *
@@ -205,7 +216,18 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with n nodes.
     */
-  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def minHeight(n: Int): Int = {
+    if (n == 0) 0  
+    else minHeight(n / 2) + 1
+  }
+  def nodeCount: Int = this match {
+    case End => 0
+    case Node(v, l, r) => 1 + l.nodeCount + r.nodeCount
+  }
+  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = {
+    (minHeight(n) to maxHbalHeight(n)).flatMap(x => hbalTrees(x, v)).toList.filter(_.nodeCount == n)
+   }
+  
 
   /** P61 (*) Count the leaves of a binary tree.
     *
@@ -217,8 +239,12 @@ sealed abstract class Tree[+T] {
     * }}}
     *
     * @return The number of leaves in the tree.
-    */ 2
-  def leafCount: Int = ???
+    */
+  def leafCount: Int = this match {
+    case End => 0
+    case Node(_, End, End) => 1
+    case Node(_, l, r) => l.leafCount + r.leafCount
+  }
 
   /** P61A (*) Collect the leaves of a binary tree in a list.
     *
