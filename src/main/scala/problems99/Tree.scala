@@ -136,7 +136,7 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all symmetric and completely balanced binary trees with n nodes.
     */
-  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = cBalanced(n, v) filter (_.isSymmetric)
 
   /** P59 (**) Construct height-balanced binary trees.
     *
@@ -158,7 +158,25 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with the given height.
     */
-  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = ???
+  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = height match {
+    case h if h <= 0 => List(End)
+    case h =>
+      val oneStoryDown = hbalTrees(h - 1, value)
+      val twoStoriesDown = hbalTrees(h - 2, value)
+      val cBalanced = for {
+        l <- oneStoryDown
+        r <- oneStoryDown
+      } yield Node(value, l, r)
+      val leftTaller = for {
+        l <- oneStoryDown
+        r <- twoStoriesDown
+      } yield Node(value, l, r)
+      val rightTaller = for {
+        l <- twoStoriesDown
+        r <- oneStoryDown
+      } yield Node(value, l, r)
+      cBalanced ::: leftTaller ::: rightTaller
+  }
 
   /** P60 (**) Construct height-balanced binary trees with a given number of nodes.
     *
@@ -192,14 +210,33 @@ sealed abstract class Tree[+T] {
     * @param h The height of the tree.
     * @return The minimum number of nodes N_min for a height-balanced tree.
     */
-  def minHbalNodes(h: Int): Int = ???
+  def minHbalNodes(h: Int): Int = {
+    if (h <= 0) 0
+    else if (h == 1) 1
+    else h - 1 + h - 2
+  }
 
   /** Maximum height of a height-balanced tree for a given number of nodes
     *
     * @param n The number of nodes.
     * @return The maximum height H of height-balanced trees.
     */
-  def maxHbalHeight(n: Int): Int = ???
+  def maxHbalHeight(n: Int): Int = {
+    if (n <= 0) 0
+    else if (n == 1) 1
+    else if (n % 2 == 1) (n - 1) / 2
+    else n / 2
+  }
+
+  def nodeCount: Int = this match {
+    case End => 0
+    case Node(_, l, r) => l.nodeCount + r.nodeCount + 1
+  }
+
+  def hbalTreesWithNodesIter[U >: T](n: Int, v: U)(h: Int): List[Tree[U]] = {
+    if (n < minHbalNodes(h)) Nil
+    else (hbalTrees(h, v) filter (_.nodeCount == n)) ::: hbalTreesWithNodesIter(n, v)(h - 1)
+  }
 
   /** All height balanced trees given the number of nodes.
     *
@@ -208,7 +245,7 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with n nodes.
     */
-  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = hbalTreesWithNodesIter(n, v)(maxHbalHeight(n))
 
   /** P61 (*) Count the leaves of a binary tree.
     *
@@ -221,7 +258,11 @@ sealed abstract class Tree[+T] {
     *
     * @return The number of leaves in the tree.
     */
-  def leafCount: Int = ???
+  def leafCount: Int = this match {
+    case End => 0
+    case Node(_, End, End) => 1
+    case Node(_, l, r) => l.leafCount + r.leafCount
+  }
 
   /** P61A (*) Collect the leaves of a binary tree in a list.
     *
