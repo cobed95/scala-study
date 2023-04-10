@@ -1,14 +1,25 @@
 package org.laplacetec.study
 package problems99
 
-sealed abstract class Tree[+T]
+sealed abstract class Tree[+T] {
+  def isSymmetric: Boolean
+
+  def leafCount: Int
+}
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
   def isSymmetric: Boolean = Tree.isMirrored(left, right)
+
+  def leafCount: Int = (left, right) match {
+    case (End, End) => 1
+    case (_, _)     => left.leafCount + right.leafCount
+  }
 }
 
 case object End extends Tree[Nothing] {
   def isSymmetric: Boolean = true
+
+  def leafCount: Int = 0
 }
 
 object Tree {
@@ -39,5 +50,32 @@ object Tree {
     case (_, End)   => false
     case (left: Node[T], right: Node[T]) =>
       isMirrored(left.left, right.right) && isMirrored(left.right, right.left)
+  }
+
+  def symmetricBalancedTrees[T]: (Int, T) => List[Tree[T]] = { (n, x) =>
+    cBalanced(n, x).filter(tree => tree.isSymmetric)
+  }
+
+  def hbalTrees[T]: (Int, T) => List[Tree[T]] = {
+    case (n, x) if n < 1 => List(End)
+    case (1, x)          => List(Node(x, End, End))
+    case (n, x) => {
+      val oneSmallerTrees = hbalTrees(n - 1, x)
+      val twoSmallerTrees = hbalTrees(n - 2, x)
+      val sameHeightTrees = oneSmallerTrees.flatMap({ left =>
+        oneSmallerTrees.map({ right =>
+          Node(x, left, right)
+        })
+      })
+      val differentHeightTrees = oneSmallerTrees.flatMap({ oneSmallerTree =>
+        twoSmallerTrees.flatMap({ twoSmallerTree =>
+          List(
+            Node(x, oneSmallerTree, twoSmallerTree),
+            Node(x, twoSmallerTree, oneSmallerTree)
+          )
+        })
+      })
+      sameHeightTrees ::: differentHeightTrees
+    }
   }
 }
