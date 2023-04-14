@@ -35,7 +35,32 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all completely balanced binary trees with n nodes.
     */
-  def cBalanced[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def cBalanced[U >: T]: (Int, U) => List[Tree[U]] = {
+    case (n, _) if n <= 0 => List(End)
+    case (n, v) if n == 0 => List(Node(v))
+    case (n, v) if n % 2 != 0 =>
+      val children = cBalanced(n - 1 / 2, v)
+      for { l <- children; r <- children } yield Node(v, l, r)
+    case (n, v) =>
+      val greater = n - 1 / 2
+      val greaterChildren = cBalanced(greater, v)
+      val lesserChildren = cBalanced(greater + 1, v)
+      val leftGreater = for {
+        l <- greaterChildren
+        r <- lesserChildren
+      } yield Node(v, l, r)
+      val rightGreater = for {
+        l <- lesserChildren
+        r <- greaterChildren
+      } yield Node(v, l, r)
+      leftGreater ::: rightGreater
+  }
+
+  def isMirrorOf[U >: T](other: Tree[U]): Boolean = (this, other) match {
+    case (End, End) => true
+    case (Node(_, tL, tR), Node(_, oL, oR)) => tL.isMirrorOf(oR) && tR.isMirrorOf(oL)
+    case (_, _) => false
+  }
 
   /** P56 (**) Symmetric binary trees.
     *
@@ -47,7 +72,10 @@ sealed abstract class Tree[+T] {
     *
     * @return A list of all symmetric binary trees with a given number of nodes.
     */
-  def isSymmetric: Boolean = ???
+  def isSymmetric: Boolean = this match {
+    case End => true
+    case Node(_, l, r) => l.isMirrorOf(r)
+  }
 
   /** P57 (**) Binary search trees (dictionaries).
     *
@@ -65,10 +93,11 @@ sealed abstract class Tree[+T] {
     * }}}
     *
     * Hint: The abstract definition of addValue in Tree should be {{{ def addValue[U >: T <% Ordered[U]](x: U): Tree[U] }}}.
-    * The {{{ >: T }}} is because addValue's parameters need to be contravariant in T.
-    * (Conceptually, we're adding nodes above existing nodes.
+    * The {{{ >: T }}} is because addValue’s parameters need to be contravariant in T.
+    * (Conceptually, we’re adding nodes above existing nodes.
     * In order for the subnodes to be of type T or any subtype, the upper nodes must be of type T or any supertype.)
     * The {{{ <% Ordered[U] }}} allows us to use the < operator on the values in the tree.
+    *
     * Use that function to construct a binary tree from a list of integers.
     *
     * Example: {{{
@@ -84,12 +113,18 @@ sealed abstract class Tree[+T] {
     *   Tree.fromList(List(3, 2, 5, 7, 4)).isSymmetric
     *   // res5: Boolean = false
     * }}}
+    *
     * @param U   The type of the value stored in the tree.
     * @param ord An implicit ordering on the values stored in the tree.
     */
-  def addValue[U >: T](value: U)(implicit ord: Ordering[U]): Tree[U] = ???
+  def addValue[U >: T](value: U)(implicit ord: Ordering[U]): Tree[U] = (this, value) match {
+    case (End, _) => Node(value)
+    case (Node(tV, l, r), v) if v <= tV => Node(tV, l.addValue(v), r)
+    case (Node(tV, l, r), v) => Node(tV, l, r.addValue(v))
+  }
 
-  def fromList[U >: T](ls: List[U])(implicit ord: Ordering[U]): Tree[U] = ???
+  def fromList[U >: T](ls: List[U])(implicit ord: Ordering[U]): Tree[U] =
+    ls.foldLeft[Tree[U]](End)((acc, curr) => acc.addValue(curr))
 
   /** P58 (**) Generate-and-test paradigm.
     *
@@ -101,7 +136,7 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all symmetric and completely balanced binary trees with n nodes.
     */
-  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def symmetricBalancedTrees[U >: T](n: Int, v: U): List[Tree[U]] = cBalanced(n, v) filter (_.isSymmetric)
 
   /** P59 (**) Construct height-balanced binary trees.
     *
@@ -123,7 +158,25 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with the given height.
     */
-  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = ???
+  def hbalTrees[U >: T](height: Int, value: U): List[Tree[U]] = height match {
+    case h if h <= 0 => List(End)
+    case h =>
+      val oneStoryDown = hbalTrees(h - 1, value)
+      val twoStoriesDown = hbalTrees(h - 2, value)
+      val cBalanced = for {
+        l <- oneStoryDown
+        r <- oneStoryDown
+      } yield Node(value, l, r)
+      val leftTaller = for {
+        l <- oneStoryDown
+        r <- twoStoriesDown
+      } yield Node(value, l, r)
+      val rightTaller = for {
+        l <- twoStoriesDown
+        r <- oneStoryDown
+      } yield Node(value, l, r)
+      cBalanced ::: leftTaller ::: rightTaller
+  }
 
   /** P60 (**) Construct height-balanced binary trees with a given number of nodes.
     *
@@ -157,14 +210,32 @@ sealed abstract class Tree[+T] {
     * @param h The height of the tree.
     * @return The minimum number of nodes N_min for a height-balanced tree.
     */
-  def minHbalNodes(h: Int): Int = ???
+  def minHbalNodes(h: Int): Int = {
+    if (h <= 0) 0
+    else if (h == 1) 1
+    else minHbalNodes(h - 1) + minHbalNodes(h - 2) + 1
+  }
 
   /** Maximum height of a height-balanced tree for a given number of nodes
     *
     * @param n The number of nodes.
     * @return The maximum height H of height-balanced trees.
     */
-  def maxHbalHeight(n: Int): Int = ???
+  def maxHbalHeight(n: Int): Int = {
+    if (n <= 0) 0
+    else if (n == 1) 1
+    else maxHbalHeight(n)
+  }
+
+  def nodeCount: Int = this match {
+    case End => 0
+    case Node(_, l, r) => l.nodeCount + r.nodeCount + 1
+  }
+
+  def hbalTreesWithNodesIter[U >: T](n: Int, v: U)(h: Int): List[Tree[U]] = {
+    if (n < minHbalNodes(h)) Nil
+    else (hbalTrees(h, v) filter (_.nodeCount == n)) ::: hbalTreesWithNodesIter(n, v)(h - 1)
+  }
 
   /** All height balanced trees given the number of nodes.
     *
@@ -173,7 +244,7 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value stored in the tree.
     * @return A list of all height-balanced binary trees with n nodes.
     */
-  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = ???
+  def hbalTreesWithNodes[U >: T](n: Int, v: U): List[Tree[U]] = hbalTreesWithNodesIter(n, v)(maxHbalHeight(n))
 
   /** P61 (*) Count the leaves of a binary tree.
     *
@@ -186,7 +257,11 @@ sealed abstract class Tree[+T] {
     *
     * @return The number of leaves in the tree.
     */
-  def leafCount: Int = ???
+  def leafCount: Int = this match {
+    case End => 0
+    case Node(_, End, End) => 1
+    case Node(_, l, r) => l.leafCount + r.leafCount
+  }
 
   /** P61A (*) Collect the leaves of a binary tree in a list.
     *
@@ -199,7 +274,13 @@ sealed abstract class Tree[+T] {
     *
     * @return A list of all leaves in the tree.
     */
-  def leafList[U >: T]: List[U] = ???
+  def leafList[U >: T]: List[U] = leafListIter(Nil)
+
+  def leafListIter[U >: T](result: List[U]): List[U] = this match {
+    case End => result
+    case Node(v, End, End) => v :: result
+    case Node(_, l, r) => l.leafListIter(r.leafListIter(result))
+  }
 
   /** P62 (*) Collect the internal nodes of a binary tree in a list.
     *
@@ -213,7 +294,13 @@ sealed abstract class Tree[+T] {
     *
     * @return A list of all internal nodes in the tree.
     */
-  def internalList[U >: T]: List[U] = ???
+  def internalList[U >: T]: List[U] = internalListIter(Nil)
+
+  def internalListIter[U >: T](result: List[U]): List[U] = this match {
+    case End => result
+    case Node(_, End, End) => result
+    case Node(v, l, r) => l.internalListIter(r.internalListIter(v :: result))
+  }
 
   /** P62B (*) Collect the nodes at a given level in a list.
     * A node of a binary tree is at level N if the path from the root to the node has length N−1.
@@ -227,7 +314,16 @@ sealed abstract class Tree[+T] {
     * @param n The level of at which to collect the elements.
     * @return List of elements at level N.
     */
-  def atLevel[U >: T](n: Int): List[U] = ???
+  def atLevel[U >: T]: Int => List[U] = atLevelIter(Nil)
+
+  def atLevelIter[U >: T](result: List[U])(n: Int): List[U] = (n, this) match {
+    case (n, _) if n <= 0 => Nil
+    case (_, End) => Nil
+    case (n, Node(v, _, _)) if n == 1 => v :: result
+    case (n, Node(_, l, r)) =>
+      val lower = n - 1
+      l.atLevelIter(r.atLevelIter(result)(lower))(lower)
+  }
 
 
   /** P63 (**) Construct a complete binary tree.
@@ -258,7 +354,16 @@ sealed abstract class Tree[+T] {
     * @tparam U The type of the value in each node
     * @return The complete binary tree with n nodes.
     */
-  def completeBinaryTree[U >: T](n: Int, v: U): Tree[U] = ???
+  def completeBinaryTree[U >: T]: (Int, U) => Tree[U] = completeBinaryTreeIter(1)
+
+  def completeBinaryTreeIter[U >: T](addr: Int)(n: Int, v: U): Tree[U] = addr match {
+    case _ if n <= 0 => End
+    case a if a <= 0 => End
+    case a if a <= n =>
+      val twice = a * 2
+      Node(v, completeBinaryTreeIter[U](twice)(n, v), completeBinaryTreeIter[U](twice + 1)(n, v))
+    case _ => End
+  }
 }
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
@@ -297,7 +402,39 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
     * @tparam U The type of the trees contents.
     * @return Tree of PositionedNodes with x_v and y_v
     */
-  def layoutBinaryTree[U >: T]: PositionedNode[U] = ???
+  def layoutBinaryTree[U >: T]: PositionedNode[U] = withInorderPosition(1)(withLevel(1)) match {
+    case (t, _) => t
+  }
+
+  def withLevel[U >: T]: Int => PositionedNode[U] = level => this match {
+    case Node(v, l @ Node(_, _, _), r @ Node(_, _, _)) =>
+      val nextLevel = level + 1
+      PositionedNode(v, l.withLevel(nextLevel), r.withLevel(nextLevel), 0, level)
+    case Node(v, l @ Node(_, _, _), End) =>
+      val nextLevel = level + 1
+      PositionedNode(v, l.withLevel(nextLevel), End, 0, level)
+    case Node(v, End, r @ Node(_, _, _)) =>
+      val nextLevel = level + 1
+      PositionedNode(v, End, r.withLevel(nextLevel), 0, level)
+    case Node(v, End, End) => PositionedNode(v, End, End, 0, level)
+  }
+
+  def withInorderPosition[U >: T](order: Int)(positionedNode: PositionedNode[U]): (PositionedNode[U], Int) = positionedNode match {
+    case PositionedNode(v, l @ PositionedNode(_, _, _, _, _), r @ PositionedNode(_, _, _, _, _), _, y) =>
+      val (positionedLeft, inorderPos) = withInorderPosition[U](order)(l)
+      val selfPosition = inorderPos + 1
+      val (positionedRight, _) = withInorderPosition[U](selfPosition + 1)(r)
+      (PositionedNode(v, positionedLeft, positionedRight, selfPosition, y), selfPosition)
+    case PositionedNode(v, l @ PositionedNode(_, _, _, _, _), _, _, y) =>
+      val (positionedLeft, inorderPos) = withInorderPosition[U](order)(l)
+      val selfPosition = inorderPos + 1
+      (PositionedNode(v, positionedLeft, End, selfPosition, y), selfPosition)
+    case PositionedNode(v, _, r @ PositionedNode(_, _, _, _, _), _, y) =>
+      val (positionedRight, _) = withInorderPosition[U](order + 1)(r)
+      (PositionedNode(v, End, positionedRight, order, y), order)
+    case PositionedNode(v, _, _, _, y) =>
+      (PositionedNode(v, End, End, order, y), order)
+  }
 
   /** P65 (**) Layout a binary tree (2).
     *

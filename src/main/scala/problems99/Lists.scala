@@ -1,6 +1,10 @@
 package org.laplacetec.study
 package problems99
 
+import scala.annotation.tailrec
+import scala.util.Random
+import scala.util.chaining.scalaUtilChainingOps
+
 object Lists {
   /** (*) Find the last element of a list
     *
@@ -12,7 +16,11 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Some(The last element) of a list if it exists, else None
     */
-  def last[A]: List[A] => Option[A] = ???
+  def last[A]: List[A] => Option[A] = {
+    case hd :: Nil => Some(hd)
+    case _ :: tl => last(tl)
+    case _ => None
+  }
 
   /** (*) Find the last but one element of a list
     *
@@ -24,7 +32,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Some(penultimate element) if it exists, None otherwise.
     */
-  def penultimate[A]: List[A] => Option[A] = ???
+  def penultimate[A]: List[A] => Option[A] = {
+    case hd :: _ :: Nil => Some(hd)
+    case _ :: Nil => None
+    case _ :: tl => penultimate(tl)
+    case _ => None
+  }
 
   /** (*) Find the Kth element of a list.
     *
@@ -37,7 +50,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return Some(nth element) if it exists, None otherwise
     */
-  def nth[A]: (Int, List[A]) => Option[A] = ???
+  def nth[A]: (Int, List[A]) => Option[A] = {
+    case (0, hd :: _) => Some(hd)
+    case (n, _ :: tl) if n > 0 => nth(n - 1, tl)
+    case (_, _ :: tl) => None
+    case (_, Nil) => None
+  }
 
   /** (*) Find the number of elements of a list.
     *
@@ -49,7 +67,16 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The number of elements in the list.
     */
-  def length[A]: List[A] => Int = ???
+  def length[A]: List[A] => Int = {
+    case Nil => 0
+    case _ :: tl => length(tl) + 1
+  }
+
+  @tailrec
+  def reverseIter[A](left: List[A])(right: List[A]): List[A] = right match {
+    case hd :: tl => reverseIter(hd :: left)(tl)
+    case _ => left
+  }
 
   /** (*) Reverse a list.
     *
@@ -61,7 +88,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The reversed list.
     */
-  def reverse[A]: List[A] => List[A] = ???
+  def reverse[A]: List[A] => List[A] = reverseIter(Nil)
+
+  def zip[L, R](left: List[L])(right: List[R]): List[(L, R)] = (left, right) match {
+    case (hdLeft :: tlLeft, hdRight :: tlRight) => (hdLeft, hdRight) :: zip(tlLeft)(tlRight)
+    case (_, Nil) => Nil
+    case (_, _) => Nil
+  }
 
   /** (*) Find out whether a list is a palindrome.
     *
@@ -73,7 +106,9 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return True if the list is a palindrome, false otherwise
     */
-  def isPalindrome[A <: Equals]: List[A] => Boolean = ???
+  def isPalindrome[A <: Equals]: List[A] => Boolean = ls => (ls zip reverse(ls)) forall {
+    case (a, b) => a == b
+  }
 
   /** (**) Flatten a nested list structure
     *
@@ -84,7 +119,19 @@ object Lists {
     *
     * @return The flattened list.
     */
-  def flatten: List[Any] => List[Any] = ???
+  def flatten: List[Any] => List[Any] = {
+    case Nil => Nil
+    case hd :: tl => hd match {
+      case ns @ _ :: _ => flatten(ns.asInstanceOf[List[Any]]) ::: flatten(tl)
+      case _ => hd :: flatten(tl)
+    }
+  }
+
+  def compressIter[A]: (A, List[A]) => List[A] = {
+    case (dup, Nil) => dup :: Nil
+    case (dup, hd :: tl) if dup == hd => compressIter(dup, tl)
+    case (dup, hd :: tl) => dup :: compressIter(hd, tl)
+  }
 
   /** (**) Eliminate consecutive duplicates of list elements.
     *
@@ -98,7 +145,17 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The compressed list.
     */
-  def compress[A]: List[A] => List[A] = ???
+  def compress[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case hd :: tl => compressIter(hd, tl)
+  }
+
+  def packIter[A]: (List[A], List[A]) => List[List[A]] = {
+    case (Nil, Nil) => Nil
+    case (ls, Nil) => ls :: Nil
+    case (res @ hdRes :: _, hdIter :: tlIter) if hdRes == hdIter => packIter(hdIter :: res, tlIter)
+    case (res @ _ :: _, hdIter :: tlIter) => res :: packIter(hdIter :: Nil, tlIter)
+  }
 
   /** (**) Pack consecutive duplicates of list elements into sublists.
     *
@@ -111,7 +168,16 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list where consecutive repeated elements are packed into sublists.
     */
-  def pack[A <: Equals]: List[A] => List[List[A]] = ???
+  def pack[A <: Equals]: List[A] => List[List[A]] = {
+    case Nil => Nil
+    case hd :: tl => packIter(hd :: Nil, tl)
+  }
+
+  def filterNoneAndGet[A <: Equals]: List[(Int, Option[A])] => List[(Int, A)] = {
+    case Nil => Nil
+    case (_, None) :: tl => filterNoneAndGet(tl)
+    case (n, Some(v)) :: tl => (n, v) :: filterNoneAndGet(tl)
+  }
 
   /** (*) Run-length encoding of a list.
     *
@@ -126,7 +192,10 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return A new run-length encoded list.
     */
-  def encode[A <: Equals]: List[A] => List[(Int, A)] = ???
+  def encode[A <: Equals](ls: List[A]): List[(Int, A)] = filterNoneAndGet(pack(ls) map {
+    case Nil => (0, None)
+    case packed @ hd :: _ => (length(packed), Some(hd))
+  })
 
   /** (*) Modified run-length encoding.
     *
@@ -141,7 +210,10 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new run-length encoded list with elements with no duplicates simply copied.
     */
-  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ???
+  def encodeModified[A <: Equals]: List[A] => List[Either[A, (Int, A)]] = ls => encode(ls) map {
+    case (n, el) if n == 1 => Left(el)
+    case el => Right(el)
+  }
 
   /** (**) Decode a run-length encoded list.
     *
@@ -154,7 +226,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return A new list that contains the decoded result.
     */
-  def decode[A]: List[(Int, A)] => List[A] = ???
+  def decode[A]: List[(Int, A)] => List[A] = {
+    case Nil => Nil
+    case (n, _) :: tl if n <= 0 => decode(tl)
+    case (n, el) :: tl => el :: decode((n - 1, el) :: tl)
+  }
 
   /** (**) Run-length encoding of a list (direct solution).
     *
@@ -179,7 +255,18 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with duplicated elements.
     */
-  def duplicate[A]: List[A] => List[A] = ???
+  def duplicate[A]: List[A] => List[A] = {
+    case Nil => Nil
+    case hd :: tl => hd :: hd :: duplicate(tl)
+  }
+
+  def duplicateNIter[A](remaining: Int)(shouldRepeat: Int, ls: List[A]): List[A] =
+    (remaining, shouldRepeat, ls) match {
+      case (_, s, _) if s <= 0 => ls
+      case (_, _, Nil) => Nil
+      case (r, _, _ :: tl) if r <= 0 => duplicateNIter(shouldRepeat)(shouldRepeat, tl)
+      case (r, s, hd :: _) => hd :: duplicateNIter(r - 1)(s, ls)
+    }
 
   /** (**) Duplicate the elements of a list a given number of times.
     *
@@ -191,7 +278,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with n duplicates.
     */
-  def duplicateN[A]: (Int, List[A]) => List[A] = ???
+  def duplicateN[A]: (Int, List[A]) => List[A] = (n, ls) => duplicateNIter(n)(n, ls)
 
   /** (**) Drop every Nth element from a list.
     *
@@ -203,7 +290,13 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list with every Nth element dropped.
     */
-  def drop[A]: (Int, List[A]) => List[A] = ???
+  def drop[A]: (Int, List[A]) => List[A] = (n, ls) => ls.foldLeft((1, List[A]())) {
+    case ((m, acc), _) if m == n => (1, acc)
+    case ((m, acc), hd) => (m + 1, hd :: acc)
+  } match {
+    case (_, acc) => reverse(acc)
+  }
+
 
   /** (*) Split a list into two parts.
     *
@@ -216,7 +309,19 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return Tuple of two lists where the first list's length is n, and the second list's length is list.length - n
     */
-  def split[A]: (Int, List[A]) => (List[A], List[A]) = ???
+  def split[A]: (Int, List[A]) => (List[A], List[A]) = (n, ls) => {
+    if (n < 0) split(n + length(ls), ls)
+    else ls.foldLeft((n, List[A](), List[A]())) {
+      case ((n, l, r), hd) if n <= 0 => (n, l, hd :: r)
+      case ((n, l, r), hd) => (n - 1, hd :: l, r)
+    } match {
+      case (_, l, r) => (reverse(l), reverse(r))
+    }
+  }
+
+  def switchConcat[A]: (List[A], List[A]) => List[A] = (l, r) => r ::: l
+
+  def untuple[A, B, C]: (((A, B)) => C) => (A, B) => C = f => (a, b) => f.apply((a, b))
 
   /** P18 (**) Extract a slice from a list.
     * Given two indices, I and K, the slice is the list containing the elements from and including the
@@ -230,7 +335,12 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The slice of the list.
     */
-  def slice[A]: (Int, Int, List[A]) => List[A] = ???
+  def slice[A]: (Int, Int, List[A]) => List[A] = {
+    case (_, _, Nil) => Nil
+    case (i, j, _ :: _) if i >= j => Nil
+    case (i, j, _ :: tl) if i > 0 => slice(i - 1, j - 1, tl)
+    case (i, j, hd :: tl) => hd :: slice(i, j - 1, tl)
+  }
 
   /** P19 (**) Rotate a list N places to the left.
     * Examples: {{{
@@ -244,7 +354,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The list rotated N places to the left.
     */
-  def rotate[A]: (Int, List[A]) => List[A] = ???
+  def rotate[A]: (Int, List[A]) => List[A] = untuple(split[A].tupled andThen switchConcat[A].tupled)
 
   /** P20 (*) Remove the Kth element from a list.
     * Return the list and the removed element in a Tuple. Elements are numbered from 0.
@@ -257,7 +367,13 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with nth element removed and the removed element.
     */
-  def removeAt[A]: (Int, List[A]) => (List[A], Option[A]) = ???
+  def removeAt[A]: (Int, List[A]) => (List[A], A) = {
+    case (_, Nil) => throw new ArrayIndexOutOfBoundsException
+    case (n, hd :: tl) if n <= 0 => (tl, hd)
+    case (n, hd :: tl) => removeAt(n - 1, tl) match {
+      case (remaining, el) => (hd :: remaining, el)
+    }
+  }
 
   /** P21 (*) Insert an element at a given position into a list.
     *
@@ -269,7 +385,11 @@ object Lists {
     * @tparam A The type of the list's elements
     * @return The list with the new element inserted at the nth position
     */
-  def insertAt[A]: (A, Int, List[A]) => List[A] = ???
+  def insertAt[A]: (A, Int, List[A]) => List[A] = {
+    case (el, _, Nil) => el :: Nil
+    case (el, n, ls) if n <= 0 => el :: ls
+    case (el, n, hd :: tl) => hd :: insertAt(el, n - 1, tl)
+  }
 
   /** P22 (*) Create a list containing all integers within a given range.
     *
@@ -280,7 +400,22 @@ object Lists {
     *
     * @return The list of all integers within a given range.
     */
-  def range: (Int, Int) => List[Int] = ???
+  def range: (Int, Int) => List[Int] = {
+    case (n, m) if n > m => Nil
+    case (n, m) => n :: range(n + 1, m)
+  }
+
+  val rand = new Random
+
+  def randomSelectIter[A]: Int => (Int, List[A]) => List[A] = length => (n, ls) => {
+    (length, n, ls) match {
+      case (_, _, Nil) => Nil
+      case (l, m, _ :: _) if m <= 0 => Nil
+      case (l, m, _ :: _) => removeAt(rand.nextInt(l), ls) match {
+        case (remaining, removed) => removed :: randomSelectIter(l - 1)(m - 1, remaining)
+      }
+    }
+  }
 
   /** P23 (**) Extract a given number of randomly selected elements from a list.
     *
@@ -294,7 +429,7 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return List with n randomly selected elements from the input list.
     */
-  def randomSelect[A]: (Int, List[A]) => List[A] = ???
+  def randomSelect[A]: (Int, List[A]) => List[A] = (n, ls) => randomSelectIter(length(ls))(n, ls)
 
   /** P24 (*) Lotto: Draw N different random numbers from the set 1..M.
     *
@@ -305,7 +440,10 @@ object Lists {
     *
     * @return List of N random numbers from set 1..M.
     */
-  def lotto: (Int, Int) => List[Int] = ???
+  def lotto: (Int, Int) => List[Int] = (n, m) => randomSelect(n, range(1, m))
+
+//  def applySequentially[A, B, C]: (A, B, A => B, B => C) => C = (a, b, f, g) =>
+//  def lotto2: (Int, Int) => List[Int] = range.curried(1) andThen randomSelect
 
   /** P25 (*) Generate a random permutation of the elements of a list.
     * Hint: Use the solution of problem P23.
@@ -318,7 +456,12 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return The random permutation of the input list.
     */
-  def randomPermute[A]: List[A] => List[A] = ???
+  def randomPermute[A]: List[A] => List[A] = ls => randomSelect(length(ls), ls)
+
+  def identity[A]: A => A = x => x
+  def apply2[A, B, C]: (A => B) => (A => C) => A => (B, C) = f => g => a => (f(a), g(a))
+  def lengthAndSelf[A]: List[A] => (Int, List[A]) = apply2(length[A])(identity[List[A]])
+  def randomPermute2[A]: List[A] => List[A] = lengthAndSelf andThen randomSelect.tupled
 
   /** P26 (**) Generate the combinations of K distinct objects chosen from the N elements of a list.
     *
@@ -329,7 +472,20 @@ object Lists {
     * @tparam A The type of the list's elements.
     * @return All combinations of K distinct objects from input elements
     */
-  def combinations[A]: (Int, List[A]) => List[List[A]] = ???
+  def combinations[A]: (Int, List[A]) => List[List[A]] = {
+    case (n, _) if n <= 0 => Nil
+    case (n, ls) if n == 1 => ls map (List(_))
+    case (_, Nil) => Nil
+    case (n, hd :: tl) => (combinations(n - 1, tl) map (hd :: _)) ::: combinations(n, tl)
+  }
+
+  implicit class Crossable[X](xs: Iterable[X]) {
+    def cross[Y](ys: Iterable[Y]) = for { x <- xs; y <- ys } yield (x, y)
+  }
+
+  implicit class Listifyable[X](xs: Iterable[(X, X)]) {
+    def listify = xs map { case (x, y) => List(x, y) }
+  }
 
   /** P27 (**) Group the elements of a set into disjoint subsets.
     *
@@ -356,7 +512,11 @@ object Lists {
     * @tparam A The type of the elements of the list to be grouped.
     * @return The list of all possible groups.
     */
-  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = ???
+  def group[A]: (List[Int], List[A]) => List[List[List[A]]] = {
+    case (groupSizes, toGroup) if groupSizes.sum != length(toGroup) => Nil
+    case (Nil, toGroup) => Nil
+    case (hd :: tl, toGroup) => combinations(hd, toGroup) map (List[List[A]](_))
+  }
 
   /** P28 (**) Sorting a list of lists according to length of sublists.
     *
