@@ -11,6 +11,8 @@ sealed abstract class Tree[+T] {
   def internalList: List[T]
 
   def atLevel: Int => List[T]
+
+  def depth: Int
 }
 
 case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
@@ -39,6 +41,8 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
     }
   }
 
+  def depth: Int = left.depth.max(right.depth)
+
   def layoutBinaryTree: Tree[T] = {
     def layoutBinaryTree: (Int, Int) => (Tree[T], Int) = { (x, y) =>
       val (leftPositionedNode, leftPositionedNodeHighestX) =
@@ -58,6 +62,19 @@ case class Node[+T](value: T, left: Tree[T], right: Tree[T]) extends Tree[T] {
     }
     layoutBinaryTree(1, 1)._1
   }
+
+  def layoutBinaryTree2: Tree[T] = {
+    def layoutBinaryTree2: (Int, Int, Int) => Tree[T] = { (x, y, z) =>
+      val differenceX = Lists.range(1, z).fold(1)((x, y) => 2 * x) - 1
+      val leftPositionedNode =
+        layoutBinaryTree2(x - differenceX, y + 1, z - 1)
+      val rightPositionedNode =
+        layoutBinaryTree2(x + differenceX, y + 1, z - 1)
+      PositionedNode(value, leftPositionedNode, rightPositionedNode, x, y)
+    }
+    val x = Lists.range(1, depth - 1).fold(1)((x, y) => 2 * x) - 1
+    layoutBinaryTree2(x, 1, depth - 3)
+  }
 }
 
 case object End extends Tree[Nothing] {
@@ -70,6 +87,8 @@ case object End extends Tree[Nothing] {
   def internalList: List[Nothing] = Nil
 
   def atLevel: Int => List[Nothing] = Nil
+
+  def depth: Int = 0
 }
 
 object Tree {
