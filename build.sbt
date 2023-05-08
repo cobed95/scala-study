@@ -9,7 +9,8 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies ++= Seq(
-  "org.scalatest" %% "scalatest" % "3.2.12" % Test
+  "org.scalatest" %% "scalatest" % "3.2.12" % Test,
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "2.3.0"
 )
 
 enablePlugins(SiteScaladocPlugin)
