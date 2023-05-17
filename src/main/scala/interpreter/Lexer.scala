@@ -10,8 +10,8 @@ class LexerException(val msg: String) extends Exception
 sealed trait Token
 
 // Arg
-case class TVNAME(str:String) extends Token
-case class TNNAME(str:String) extends Token
+case class TVNAME(str: String) extends Token
+case class TNNAME(str: String) extends Token
 
 // Bind
 case class TDEF() extends Token
@@ -19,7 +19,7 @@ case class TVAL() extends Token
 case class TLAZYVAL() extends Token
 
 // Expr
-case class TINT(n:Int) extends Token
+case class TINT(n: Int) extends Token
 case class TTRUE() extends Token
 case class TFALSE() extends Token
 case class TNIL() extends Token
@@ -140,15 +140,19 @@ object ProjLexer extends RegexParsers {
   }
 
   def tokens: Parser[List[Token]] = {
-    phrase(rep1(tint|ttrue|tfalse|tnil|
-      tif|tcons|tfst|tsnd|tapp|tlet|tmatch|trmk|trfd|tdef|tval|tlazyval|
-      tplus|tminus|tmult|teq|tlt|tgt|tthrow|ttrycatch|tlparen|trparen|
-      tnname|tvname)) ^^ { t => t }
+    phrase(
+      rep1(
+        tint | ttrue | tfalse | tnil |
+          tif | tcons | tfst | tsnd | tapp | tlet | tmatch | trmk | trfd | tdef | tval | tlazyval |
+          tplus | tminus | tmult | teq | tlt | tgt | tthrow | ttrycatch | tlparen | trparen |
+          tnname | tvname
+      )
+    ) ^^ { t => t }
   }
 
   def apply(code: String): List[Token] = {
     parse(tokens, code) match {
-      case NoSuccess(msg, next) => throw new LexerException(msg)
+      case NoSuccess(msg, next)  => throw new LexerException(msg)
       case Success(result, next) => result
     }
   }
